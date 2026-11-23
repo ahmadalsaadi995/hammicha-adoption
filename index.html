@@ -49,7 +49,7 @@
   
   /* --- ATARI GAME STYLES --- */
   .game-wrapper {
-    background: #0f172a; /* Deep night blue */
+    background: #2a1b38; /* Deep twilight purple */
     border-radius: 18px;
     overflow: hidden;
     position: relative;
@@ -59,8 +59,8 @@
   canvas {
     display: block;
     width: 100%;
-    height: 320px;
-    image-rendering: pixelated; /* Retro look */
+    height: 400px; /* BIGGER SCREEN */
+    image-rendering: pixelated;
   }
   .game-overlay {
     position: absolute;
@@ -69,7 +69,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(42, 27, 56, 0.85);
     color: #fff;
     text-align: center;
     padding: 20px;
@@ -188,7 +188,7 @@
     <!-- UPGRADED ATARI GAME -->
     <section>
       <h2>Play Hammicha's Midnight Run!</h2>
-      <p style="margin-bottom: 15px; font-size: 0.95rem; color: var(--muted);">Help Hammicha dodge the streets of Amman! Catch treats at 10m and wet food at 20m. <br><strong>Tap or press Spacebar to jump.</strong></p>
+      <p style="margin-bottom: 15px; font-size: 0.95rem; color: var(--muted);">Help Hammicha run exactly <strong>25 meters</strong> to get back to her cozy home! Catch treats along the way.<br><strong>Tap or press Spacebar to jump.</strong></p>
       <div class="game-wrapper">
         <canvas id="gameCanvas"></canvas>
         <div class="game-overlay" id="gameOverlay">
@@ -390,75 +390,76 @@
   const ctx = canvas.getContext('2d');
   const overlay = document.getElementById('gameOverlay');
 
-  // Make it responsive but keep fixed pixel height
   function resizeCanvas() {
     canvas.width = canvas.parentElement.clientWidth;
-    canvas.height = 320;
-    ctx.imageSmoothingEnabled = false; // Crucial for pixel art
+    canvas.height = 400; // Larger screen
+    ctx.imageSmoothingEnabled = false; 
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
   let gameLoop;
   let isPlaying = false;
+  let isWinning = false;
   let distance = 0;
-  let speed = 5;
-  let gravity = 0.65;
-  let jumpForce = -11.5;
+  let speed = 4;
+  let gravity = 0.7;
+  let jumpForce = -12;
   let frames = 0;
 
-  // Player State
   const player = {
     x: 60,
     y: 0,
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     vy: 0,
     isJumping: false,
-    isCrying: false
+    isCrying: false,
+    isKissing: false
   };
 
   let obstacles = [];
   let rewards = [];
-  let hearts = [];
   let buildings = [];
-  
+  let winHearts = [];
+  let house = { x: -200, y: 0, width: 150, height: 150 };
+
   let treatsCaught = 0;
   let wetFoodCaught = 0;
 
-  // Initialize Background Elements
   function initBackground() {
     buildings = [];
     for (let i = 0; i < 10; i++) {
       buildings.push({
-        x: i * 80,
-        width: 60 + Math.random() * 20,
-        height: 80 + Math.random() * 100,
-        color: '#1e293b', // Dark slate
-        windows: Array.from({ length: 10 }, () => Math.random() > 0.4) // Random lit windows
+        x: i * 100,
+        width: 70 + Math.random() * 30,
+        height: 100 + Math.random() * 150,
+        color: '#4c1d95', // Purple buildings for sunset
+        windows: Array.from({ length: 15 }, () => Math.random() > 0.4)
       });
-    }
-    hearts = [];
-    for (let i = 0; i < 5; i++) {
-      hearts.push({ x: Math.random() * 800, y: Math.random() * 300, speed: 0.5 + Math.random() });
     }
   }
 
   function startGame() {
     overlay.style.display = 'none';
     isPlaying = true;
+    isWinning = false;
     distance = 0;
-    speed = 5;
+    speed = 4;
     obstacles = [];
     rewards = [];
+    winHearts = [];
     treatsCaught = 0;
     wetFoodCaught = 0;
     frames = 0;
+    house.x = -200;
     
     player.y = canvas.height - player.height - 20; 
     player.vy = 0;
     player.isJumping = false;
     player.isCrying = false;
+    player.isKissing = false;
+    player.x = 60;
     
     initBackground();
     
@@ -467,14 +468,13 @@
   }
 
   function jump() {
-    if (!isPlaying) return;
+    if (!isPlaying || isWinning) return;
     if (!player.isJumping) {
       player.vy = jumpForce;
       player.isJumping = true;
     }
   }
 
-  // Controls
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') { e.preventDefault(); jump(); }
   });
@@ -482,68 +482,60 @@
   canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
 
   function update() {
-    if (!isPlaying) {
-      if (player.isCrying) drawGameOverState(); // Keep rendering tears
+    if (!isPlaying && !isWinning) {
+      if (player.isCrying) drawGameOverState(); 
       return;
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     frames++;
 
-    // 1. Draw Background
-    ctx.fillStyle = '#0f172a'; // Night sky
+    // 1. Sky Gradient (Sunset)
+    let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#f472b6'); // Pink
+    gradient.addColorStop(0.5, '#f97316'); // Orange
+    gradient.addColorStop(1, '#4c1d95'); // Purple
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw Moon
-    ctx.fillStyle = '#fcd34d';
-    ctx.beginPath();
-    ctx.arc(canvas.width - 60, 50, 25, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath();
-    ctx.arc(canvas.width - 70, 45, 22, 0, Math.PI * 2);
-    ctx.fill();
 
-    // Draw Buildings
+    // 2. Draw Buildings (Parallax)
     buildings.forEach(b => {
-      b.x -= speed * 0.3; // Parallax effect
-      if (b.x + b.width < 0) b.x = canvas.width + 10;
+      if (!isWinning) b.x -= speed * 0.4;
+      
+      if (b.x + b.width < 0) {
+        b.x = canvas.width + 10;
+        b.height = 100 + Math.random() * 150;
+      }
       
       ctx.fillStyle = b.color;
       ctx.fillRect(b.x, canvas.height - 20 - b.height, b.width, b.height);
       
-      // Draw Windows
       b.windows.forEach((isLit, i) => {
         if (isLit) {
-          ctx.fillStyle = (i % 3 === 0) ? '#fbbf24' : '#38bdf8'; // Yellow or Cyan
-          let wx = b.x + 10 + (i % 3) * 15;
-          let wy = (canvas.height - 20 - b.height) + 15 + Math.floor(i / 3) * 20;
-          if (wx < b.x + b.width - 10) ctx.fillRect(wx, wy, 6, 8);
+          ctx.fillStyle = (i % 3 === 0) ? '#fbbf24' : '#38bdf8';
+          let wx = b.x + 10 + (i % 4) * 15;
+          let wy = (canvas.height - 20 - b.height) + 15 + Math.floor(i / 4) * 20;
+          if (wx < b.x + b.width - 10 && wy < canvas.height - 30) {
+            ctx.fillRect(wx, wy, 6, 8);
+          }
         }
       });
     });
 
-    // Draw Floating Hearts
-    hearts.forEach(h => {
-      h.y -= h.speed;
-      if (h.y < -20) { h.y = canvas.height + 20; h.x = Math.random() * canvas.width; }
-      ctx.fillStyle = 'rgba(244, 114, 182, 0.4)'; // Pink hearts
-      drawHeart(h.x, h.y, 6);
-    });
-
-    // Ground
-    ctx.fillStyle = '#1e293b';
+    // 3. Ground
+    ctx.fillStyle = '#1e1b4b';
     ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
-    // Road markings
-    ctx.fillStyle = '#475569';
-    for (let i = 0; i < canvas.width + 50; i += 50) {
-      let offset = (frames * speed) % 50;
-      ctx.fillRect(i - offset, canvas.height - 10, 25, 4);
+    ctx.fillStyle = '#6b7280'; // Light grey road markings for contrast
+    for (let i = 0; i < canvas.width + 50; i += 60) {
+      let offset = isWinning ? 0 : (frames * speed) % 60;
+      ctx.fillRect(i - offset, canvas.height - 10, 30, 4);
     }
 
-    // 2. Player Physics
-    player.vy += gravity;
-    player.y += player.vy;
+    // 4. Player Physics
+    if (!isWinning) {
+      player.vy += gravity;
+      player.y += player.vy;
+    }
 
     if (player.y > canvas.height - player.height - 20) {
       player.y = canvas.height - player.height - 20;
@@ -551,271 +543,319 @@
       player.isJumping = false;
     }
 
-    drawPixelCat(player.x, player.y, player.isJumping, player.isCrying);
+    // 5. WINNING LOGIC
+    if (distance >= 25 && !isWinning) {
+      isWinning = true;
+      obstacles = [];
+      rewards = [];
+      player.isKissing = true;
+      // Trigger win sequence
+      setTimeout(triggerWinSequence, 500); 
+    }
 
-    // 3. Spawning Logic
-    // Obstacles
-    if (frames % Math.floor(90 - speed * 2) === 0) {
-      let types = ['car', 'mouse', 'cucumber', 'cat'];
-      let type = types[Math.floor(Math.random() * types.length)];
-      let obsWidth = type === 'car' ? 50 : (type === 'cucumber' ? 30 : 25);
-      let obsHeight = type === 'car' ? 30 : (type === 'cucumber' ? 12 : 20);
+    if (isWinning) {
+      // Slide the house in
+      if (house.x < canvas.width - 180) {
+        house.x += 4;
+      }
+      drawHouse(house.x, canvas.height - 20 - house.height, house.width, house.height);
       
-      obstacles.push({
-        x: canvas.width,
-        y: canvas.height - 20 - obsHeight,
-        width: obsWidth,
-        height: obsHeight,
-        type: type
-      });
-    }
-
-    // Rewards (Treats at 10m, Wet food at 20m, then random)
-    if (distance === 10) {
-      rewards.push({ x: canvas.width, y: canvas.height - 100, type: 'treat', speed: speed });
-    } else if (distance === 20) {
-      rewards.push({ x: canvas.width, y: canvas.height - 100, type: 'wetfood', speed: speed });
-    } else if (distance > 25 && frames % 150 === 0) {
-      rewards.push({ x: canvas.width, y: canvas.height - 120, type: Math.random() > 0.5 ? 'treat' : 'wetfood', speed: speed });
-    }
-
-    // 4. Update & Draw Obstacles
-    for (let i = obstacles.length - 1; i >= 0; i--) {
-      let obs = obstacles[i];
-      obs.x -= speed;
-
-      drawObstacle(obs);
-
-      // Collision (Shrunk hitbox for fairness)
-      if (
-        player.x + 10 < obs.x + obs.width &&
-        player.x + player.width - 10 > obs.x &&
-        player.y + 10 < obs.y + obs.height &&
-        player.y + player.height > obs.y
-      ) {
-        gameOver();
-        return;
-      }
-
-      if (obs.x + obs.width < 0) {
-        obstacles.splice(i, 1);
-        distance++;
-        if (distance % 5 === 0) speed += 0.3; // Get faster
+      // Generate kisses/hearts
+      if (frames % 10 === 0) {
+        winHearts.push({
+          x: player.x + 20,
+          y: player.y + 10,
+          vx: (Math.random() - 0.5) * 2,
+          vy: -2 - Math.random() * 2,
+          life: 100
+        });
       }
     }
 
-    // 5. Update & Draw Rewards
-    for (let i = rewards.length - 1; i >= 0; i--) {
-      let rew = rewards[i];
-      rew.x -= speed;
-      
-      // Bobbing animation
-      rew.y = (canvas.height - 100) + Math.sin(frames * 0.1) * 20;
+    // Draw floating hearts (only during win)
+    winHearts.forEach((h, index) => {
+      h.x += h.vx;
+      h.y += h.vy;
+      h.life--;
+      ctx.fillStyle = `rgba(239, 68, 68, ${h.life / 100})`;
+      drawHeart(h.x, h.y, 10);
+      if (h.life <= 0) winHearts.splice(index, 1);
+    });
 
-      drawReward(rew);
+    drawPixelCat(player.x, player.y, player.isJumping, player.isCrying, player.isKissing);
 
-      // Collision with reward
-      if (
-        player.x < rew.x + 20 &&
-        player.x + player.width > rew.x &&
-        player.y < rew.y + 20 &&
-        player.y + player.height > rew.y
-      ) {
-        if (rew.type === 'treat') treatsCaught++;
-        if (rew.type === 'wetfood') wetFoodCaught++;
+    // 6. Spawning Logic (Only if not winning)
+    if (!isWinning) {
+      // Obstacles
+      if (frames % Math.floor(100 - speed * 3) === 0) {
+        let types = ['car', 'mouse', 'cucumber', 'cat'];
+        let type = types[Math.floor(Math.random() * types.length)];
+        let obsWidth = type === 'car' ? 50 : (type === 'cucumber' ? 35 : 25);
+        let obsHeight = type === 'car' ? 30 : (type === 'cucumber' ? 12 : 22);
         
-        // Draw "+1" effect
-        ctx.fillStyle = '#fff';
-        ctx.font = '16px "Courier New"';
-        ctx.fillText("+1", rew.x, rew.y - 10);
-        
-        rewards.splice(i, 1);
-      } else if (rew.x < -20) {
-        rewards.splice(i, 1);
+        obstacles.push({
+          x: canvas.width,
+          y: canvas.height - 20 - obsHeight,
+          width: obsWidth,
+          height: obsHeight,
+          type: type
+        });
+      }
+
+      // Rewards
+      if (distance === 10) {
+        rewards.push({ x: canvas.width, y: canvas.height - 120, type: 'treat', speed: speed });
+      } else if (distance === 20) {
+        rewards.push({ x: canvas.width, y: canvas.height - 120, type: 'wetfood', speed: speed });
+      } else if (distance > 22 && distance < 25 && frames % 80 === 0) {
+        rewards.push({ x: canvas.width, y: canvas.height - 140, type: Math.random() > 0.5 ? 'treat' : 'wetfood', speed: speed });
+      }
+
+      // Update & Draw Obstacles
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        let obs = obstacles[i];
+        obs.x -= speed;
+        drawObstacle(obs);
+
+        if (
+          player.x + 10 < obs.x + obs.width &&
+          player.x + player.width - 10 > obs.x &&
+          player.y + 10 < obs.y + obs.height &&
+          player.y + player.height > obs.y
+        ) {
+          gameOver();
+          return;
+        }
+
+        if (obs.x + obs.width < 0) {
+          obstacles.splice(i, 1);
+          distance++;
+          if (distance % 5 === 0) speed += 0.5; 
+        }
+      }
+
+      // Update & Draw Rewards
+      for (let i = rewards.length - 1; i >= 0; i--) {
+        let rew = rewards[i];
+        rew.x -= speed;
+        rew.y = (canvas.height - 120) + Math.sin(frames * 0.1) * 20;
+        drawReward(rew);
+
+        if (
+          player.x < rew.x + 20 &&
+          player.x + player.width > rew.x &&
+          player.y < rew.y + 20 &&
+          player.y + player.height > rew.y
+        ) {
+          if (rew.type === 'treat') treatsCaught++;
+          if (rew.type === 'wetfood') wetFoodCaught++;
+          
+          ctx.fillStyle = '#fff';
+          ctx.font = '16px "Courier New"';
+          ctx.fillText("+1", rew.x, rew.y - 10);
+          rewards.splice(i, 1);
+        } else if (rew.x < -20) {
+          rewards.splice(i, 1);
+        }
       }
     }
 
-    // 6. Draw UI (Score & Items)
+    // 7. UI
     ctx.fillStyle = '#fff';
-    ctx.font = '18px "Courier New", monospace';
-    ctx.fillText(`DISTANCE: ${distance}m`, canvas.width - 180, 30);
-    
-    // Icons for collected items
+    ctx.font = 'bold 18px "Courier New", monospace';
+    ctx.textShadow = "2px 2px 0 #000";
+    ctx.fillText(`DISTANCE: ${distance}m / 25m`, canvas.width - 240, 30);
     ctx.fillText(`🍪 x ${treatsCaught}`, 20, 30);
     ctx.fillText(`🥫 x ${wetFoodCaught}`, 130, 30);
 
     gameLoop = requestAnimationFrame(update);
   }
 
+  function triggerWinSequence() {
+    isPlaying = false;
+    overlay.style.display = 'flex';
+    overlay.innerHTML = `
+      <h3 style="color:#f472b6;">Hammicha is Home!</h3>
+      <p style="font-size: 1.2rem; margin: 10px 0;">You ran ${distance} meters safely!</p>
+      <p style="margin-bottom: 20px; max-width: 90%; margin-left: auto; margin-right: auto; line-height:1.4; color:#cbd5e1;">
+        She is sending you a big kiss for helping her! 💋<br>
+        She caught <strong>${treatsCaught}</strong> treats and <strong>${wetFoodCaught}</strong> wet foods.<br><br>
+        <strong style="color:#fbbf24;">She is ready for her new forever family. Will it be you?</strong>
+      </p>
+      <button class="game-btn" onclick="startGame()">Play Again</button>
+    `;
+  }
+
   function gameOver() {
     isPlaying = false;
     player.isCrying = true;
-    
-    // Stop obstacles
     obstacles = [];
     rewards = [];
-    
-    // Let the requestAnimationFrame draw the final state with tears
     requestAnimationFrame(drawGameOverState);
     
     setTimeout(() => {
       overlay.style.display = 'flex';
       overlay.innerHTML = `
-        <h3 style="color:#f472b6;">Meow... I tripped!</h3>
+        <h3 style="color:#ef4444;">Meow... I tripped!</h3>
         <p style="font-size: 1.2rem; margin: 10px 0;">You ran ${distance} meters.</p>
-        <p style="margin-bottom: 20px; max-width: 90%; margin-left: auto; margin-right: auto; line-height:1.4;">
+        <p style="margin-bottom: 20px; max-width: 90%; margin-left: auto; margin-right: auto; line-height:1.4; color:#cbd5e1;">
           Hammicha is crying! 😿<br>
           She caught <strong>${treatsCaught}</strong> treats and <strong>${wetFoodCaught}</strong> wet foods.<br><br>
-          ${distance > 20 ? "Amazing run! Hammicha loves playing with you. Maybe you should adopt her?" : "Can you help her run further next time?"}
+          You were almost home! Want to try again?
         </p>
         <button class="game-btn" onclick="startGame()">Try Again</button>
       `;
-    }, 1000); // 1 second delay so user sees her cry
+    }, 1000);
   }
 
   // --- DRAWING HELPERS ---
   function drawGameOverState() {
-    // Redraw background elements so it doesn't clear
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#0f172a';
+    
+    let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#f472b6');
+    gradient.addColorStop(1, '#4c1d95');
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw ground
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = '#1e1b4b';
     ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
     
-    // Draw crying cat
-    drawPixelCat(player.x, player.y, false, true);
+    drawPixelCat(player.x, player.y, false, true, false);
     
-    // Animate tears falling
     if (player.isCrying) {
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = '#38bdf8'; // Blue tears
       let tearY = player.y + 20 + (Date.now() / 100) % 30;
-      ctx.fillRect(player.x + 10, tearY, 3, 6);
-      ctx.fillRect(player.x + 25, tearY, 3, 6);
+      ctx.fillRect(player.x + 12, tearY, 4, 8);
+      ctx.fillRect(player.x + 28, tearY, 4, 8);
       requestAnimationFrame(drawGameOverState);
     }
   }
 
-  function drawPixelCat(x, y, isJumping, isCrying) {
-    // Orange Body
+  function drawPixelCat(x, y, isJumping, isCrying, isKissing) {
     ctx.fillStyle = '#d97736';
-    ctx.fillRect(x + 6, y + 12, 24, 24);
-    // Head
-    ctx.fillRect(x, y, 36, 18);
-    // Ears
-    ctx.fillRect(x, y - 6, 6, 6);
-    ctx.fillRect(x + 30, y - 6, 6, 6);
-    // Tail (wags if jumping)
-    ctx.fillRect(x - 6, y + (isJumping ? 8 : 16), 12, 6);
+    ctx.fillRect(x + 6, y + 12, 28, 28);
+    ctx.fillRect(x, y, 40, 20); // Head
+    ctx.fillRect(x, y - 8, 8, 8); // Ear
+    ctx.fillRect(x + 32, y - 8, 8, 8); // Ear
+    ctx.fillRect(x - 8, y + (isJumping ? 10 : 20), 14, 6); // Tail
     
-    // White patches
     ctx.fillStyle = '#fff';
-    ctx.fillRect(x + 15, y, 6, 18); // nose stripe
-    ctx.fillRect(x + 6, y + 26, 24, 10); // belly
+    ctx.fillRect(x + 15, y, 10, 20);
+    ctx.fillRect(x + 6, y + 30, 28, 10);
     
-    // Eyes
+    ctx.fillStyle = '#000';
     if (isCrying) {
-      // Closed crying eyes ^ ^
-      ctx.fillStyle = '#000';
-      ctx.fillRect(x + 6, y + 8, 6, 2);
-      ctx.fillRect(x + 24, y + 8, 6, 2);
-      // Mouth (sad)
-      ctx.fillRect(x + 15, y + 14, 6, 2);
-      ctx.fillRect(x + 13, y + 12, 2, 2);
-      ctx.fillRect(x + 21, y + 12, 2, 2);
+      ctx.fillRect(x + 8, y + 8, 8, 2);
+      ctx.fillRect(x + 24, y + 8, 8, 2);
+      ctx.fillRect(x + 16, y + 16, 8, 2);
+    } else if (isKissing) {
+      // Happy closed eyes
+      ctx.fillRect(x + 8, y + 8, 8, 2);
+      ctx.fillRect(x + 24, y + 8, 8, 2);
+      // Smile
+      ctx.fillRect(x + 14, y + 14, 12, 2);
+      ctx.fillRect(x + 12, y + 12, 2, 2);
+      ctx.fillRect(x + 26, y + 12, 2, 2);
+      // Kiss mouth
+      ctx.fillStyle = '#ef4444'; // Red lips
+      ctx.fillRect(x + 16, y + 18, 8, 4);
     } else {
-      // Wide open eyes
+      // Normal eyes
       ctx.fillStyle = '#fff';
-      ctx.fillRect(x + 6, y + 4, 8, 8);
-      ctx.fillRect(x + 22, y + 4, 8, 8);
-      // Pupils
+      ctx.fillRect(x + 8, y + 4, 8, 8);
+      ctx.fillRect(x + 24, y + 4, 8, 8);
       ctx.fillStyle = '#000';
-      ctx.fillRect(x + 8, y + 6, 4, 6);
-      ctx.fillRect(x + 24, y + 6, 4, 6);
-      // Nose
+      ctx.fillRect(x + 10, y + 6, 4, 6);
+      ctx.fillRect(x + 26, y + 6, 4, 6);
       ctx.fillStyle = '#f472b6';
-      ctx.fillRect(x + 16, y + 12, 4, 2);
+      ctx.fillRect(x + 18, y + 14, 4, 2);
     }
+  }
+
+  function drawHouse(x, y, w, h) {
+    // Wall
+    ctx.fillStyle = '#fcd34d'; // Warm yellow
+    ctx.fillRect(x + 20, y + 60, w - 40, h - 60);
+    // Roof
+    ctx.fillStyle = '#b91c1c'; // Red roof
+    ctx.beginPath();
+    ctx.moveTo(x, y + 60);
+    ctx.lineTo(x + w / 2, y);
+    ctx.lineTo(x + w, y + 60);
+    ctx.fill();
+    // Door
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(x + w / 2 - 15, y + 100, 30, 50);
+    // Window (lit)
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(x + 35, y + 80, 25, 25);
+    ctx.fillRect(x + w - 60, y + 80, 25, 25);
+    // Window cross
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(x + 45, y + 80, 4, 25);
+    ctx.fillRect(x + 35, y + 90, 25, 4);
   }
 
   function drawObstacle(obs) {
     ctx.fillStyle = '#000';
-    
     if (obs.type === 'car') {
-      // Car Body
-      ctx.fillStyle = '#ef4444'; // Red car
+      ctx.fillStyle = '#ef4444'; // Bright red
       ctx.fillRect(obs.x, obs.y + 10, obs.width, 20);
-      // Roof
-      ctx.fillStyle = '#b91c1c';
+      ctx.fillStyle = '#fff'; // White roof for contrast
       ctx.fillRect(obs.x + 10, obs.y, obs.width - 20, 10);
-      // Wheels
-      ctx.fillStyle = '#111';
+      ctx.fillStyle = '#111'; 
       ctx.fillRect(obs.x + 5, obs.y + 25, 10, 10);
       ctx.fillRect(obs.x + obs.width - 15, obs.y + 25, 10, 10);
-      // Headlights
-      ctx.fillStyle = '#fef08a';
-      ctx.fillRect(obs.x + 2, obs.y + 15, 4, 4);
+      ctx.fillStyle = '#fef08a'; // Headlight
+      ctx.fillRect(obs.x + 2, obs.y + 15, 6, 6);
     } 
     else if (obs.type === 'mouse') {
-      // Gray mouse
-      ctx.fillStyle = '#9ca3af';
+      ctx.fillStyle = '#f8fafc'; // White mouse
       ctx.fillRect(obs.x, obs.y + 8, obs.width, 12);
-      // Ears
-      ctx.fillRect(obs.x + 4, obs.y, 8, 8);
-      // Tail
-      ctx.fillStyle = '#f472b6';
-      ctx.fillRect(obs.x - 6, obs.y + 15, 6, 2);
-      // Eye
-      ctx.fillStyle = '#000';
+      ctx.fillRect(obs.x + 4, obs.y, 10, 8); // Ears
+      ctx.fillStyle = '#f472b6'; // Pink tail
+      ctx.fillRect(obs.x - 8, obs.y + 15, 8, 2);
+      ctx.fillStyle = '#000'; // Eye
       ctx.fillRect(obs.x + obs.width - 6, obs.y + 10, 2, 2);
     } 
     else if (obs.type === 'cucumber') {
-      // Green Cucumber
-      ctx.fillStyle = '#22c55e';
+      ctx.fillStyle = '#22c55e'; // Bright green
       ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-      // Stripes
       ctx.fillStyle = '#166534';
       ctx.fillRect(obs.x + 5, obs.y, 4, obs.height);
       ctx.fillRect(obs.x + 15, obs.y, 4, obs.height);
       ctx.fillRect(obs.x + 25, obs.y, 4, obs.height);
     } 
     else if (obs.type === 'cat') {
-      // Rival Black Cat
-      ctx.fillStyle = '#1f2937';
+      ctx.fillStyle = '#8b5cf6'; // Purple/Blue rival cat so it stands out
       ctx.fillRect(obs.x + 5, obs.y + 5, 15, 15);
       ctx.fillRect(obs.x, obs.y, 25, 12);
-      // Ears
-      ctx.fillRect(obs.x, obs.y - 4, 4, 4);
-      ctx.fillRect(obs.x + 21, obs.y - 4, 4, 4);
-      // Eyes
-      ctx.fillStyle = '#fbbf24';
-      ctx.fillRect(obs.x + 4, obs.y + 4, 4, 4);
-      ctx.fillRect(obs.x + 17, obs.y + 4, 4, 4);
+      ctx.fillRect(obs.x, obs.y - 4, 4, 4); // Ear
+      ctx.fillRect(obs.x + 21, obs.y - 4, 4, 4); // Ear
+      ctx.fillStyle = '#fbbf24'; // Yellow eyes
+      ctx.fillRect(obs.x + 4, obs.y + 4, 5, 5);
+      ctx.fillRect(obs.x + 16, obs.y + 4, 5, 5);
     }
   }
 
   function drawReward(rew) {
     if (rew.type === 'treat') {
-      // Golden Treat
       ctx.fillStyle = '#eab308';
       ctx.fillRect(rew.x, rew.y, 20, 15);
       ctx.fillStyle = '#854d0e';
       ctx.fillRect(rew.x + 5, rew.y + 3, 10, 9);
-      // Star sparkle
       ctx.fillStyle = '#fff';
       ctx.fillRect(rew.x + 18, rew.y - 4, 2, 6);
       ctx.fillRect(rew.x + 16, rew.y - 2, 6, 2);
     } else {
-      // Wet Food Can
-      ctx.fillStyle = '#ef4444'; // Red can
+      ctx.fillStyle = '#ef4444';
       ctx.fillRect(rew.x, rew.y, 22, 18);
-      ctx.fillStyle = '#cbd5e1'; // Silver lid
+      ctx.fillStyle = '#cbd5e1';
       ctx.fillRect(rew.x - 1, rew.y - 2, 24, 4);
-      // Label
       ctx.fillStyle = '#fff';
       ctx.fillRect(rew.x + 4, rew.y + 5, 14, 8);
-      ctx.fillStyle = '#f472b6'; // pink label detail
+      ctx.fillStyle = '#f472b6';
       ctx.fillRect(rew.x + 6, rew.y + 7, 10, 4);
     }
   }
