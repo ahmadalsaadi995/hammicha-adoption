@@ -18,7 +18,7 @@
   body{
     font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
     background-color: var(--coral);
-    background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.45' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Cat 1: Sitting --%3E%3Cg transform='translate(40, 40) scale(1.2)'%3E%3Cpath d='M 20 40 C 10 40 5 30 5 20 C 5 10 15 5 25 5 C 35 5 40 15 40 25 C 40 35 30 40 20 40 Z'/%3E%3Cpath d='M 10 10 L 5 0 L 15 5'/%3E%3Cpath d='M 30 10 L 35 0 L 25 5'/%3E%3Cpath d='M 5 25 C -5 25 -10 30 -10 40'/%3E%3C/g%3E%3C!-- Cat 2: Stretching up --%3E%3Cg transform='translate(250, 80) scale(1.1)'%3E%3Cpath d='M 10 30 C 10 15 20 0 30 0 C 40 0 45 15 40 30 C 35 45 20 50 15 60'/%3E%3Cpath d='M 15 10 L 10 0 L 20 5'/%3E%3Cpath d='M 35 10 L 40 0 L 30 5'/%3E%3Cpath d='M 40 30 C 50 25 60 30 60 40'/%3E%3C/g%3E%3C!-- Cat 3: Laying/Sleeping --%3E%3Cg transform='translate(120, 240) scale(1.3)'%3E%3Cpath d='M 10 20 C 0 20 -10 30 -10 40 C -10 50 0 55 15 55 C 30 55 40 45 40 35 C 40 25 30 20 20 20 Z'/%3E%3Cpath d='M 0 30 L -5 20 L 5 25'/%3E%3Cpath d='M 15 30 L 20 20 L 25 25'/%3E%3Cpath d='M 40 35 C 50 35 55 45 55 55'/%3E%3C/g%3E%3C!-- Cat 4: Reaching hand up --%3E%3Cg transform='translate(300, 280) scale(1)'%3E%3Cpath d='M 20 40 C 10 40 5 30 5 20 C 5 10 15 5 25 5 C 35 5 40 15 40 25 C 40 35 30 40 20 40 Z'/%3E%3Cpath d='M 10 10 L 5 0 L 15 5'/%3E%3Cpath d='M 30 10 L 35 0 L 25 5'/%3E%3Cpath d='M 5 15 C -10 10 -15 0 -10 -10'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.45' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(40, 40) scale(1.2)'%3E%3Cpath d='M 20 40 C 10 40 5 30 5 20 C 5 10 15 5 25 5 C 35 5 40 15 40 25 C 40 35 30 40 20 40 Z'/%3E%3Cpath d='M 10 10 L 5 0 L 15 5'/%3E%3Cpath d='M 30 10 L 35 0 L 25 5'/%3E%3Cpath d='M 5 25 C -5 25 -10 30 -10 40'/%3E%3C/g%3E%3Cg transform='translate(250, 80) scale(1.1)'%3E%3Cpath d='M 10 30 C 10 15 20 0 30 0 C 40 0 45 15 40 30 C 35 45 20 50 15 60'/%3E%3Cpath d='M 15 10 L 10 0 L 20 5'/%3E%3Cpath d='M 35 10 L 40 0 L 30 5'/%3E%3Cpath d='M 40 30 C 50 25 60 30 60 40'/%3E%3C/g%3E%3Cg transform='translate(120, 240) scale(1.3)'%3E%3Cpath d='M 10 20 C 0 20 -10 30 -10 40 C -10 50 0 55 15 55 C 30 55 40 45 40 35 C 40 25 30 20 20 20 Z'/%3E%3Cpath d='M 0 30 L -5 20 L 5 25'/%3E%3Cpath d='M 15 30 L 20 20 L 25 25'/%3E%3Cpath d='M 40 35 C 50 35 55 45 55 55'/%3E%3C/g%3E%3Cg transform='translate(300, 280) scale(1)'%3E%3Cpath d='M 20 40 C 10 40 5 30 5 20 C 5 10 15 5 25 5 C 35 5 40 15 40 25 C 40 35 30 40 20 40 Z'/%3E%3Cpath d='M 10 10 L 5 0 L 15 5'/%3E%3Cpath d='M 30 10 L 35 0 L 25 5'/%3E%3Cpath d='M 5 15 C -10 10 -15 0 -10 -10'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     background-size: 450px 450px;
     color:var(--ink);
     line-height:1.6;
@@ -35,37 +35,10 @@
   
   .hero{width:100%;max-height:550px;object-fit:cover;object-position:center 30%;border-radius:18px;display:block;box-shadow:0 8px 24px rgba(0,0,0,.12);cursor: zoom-in;}
   
-  /* NEW: Updated Scroll Indicator with Fade Transition */
-  .scroll-indicator {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-top: 15px;
-    margin-bottom: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    animation: bounce 2s infinite;
-    transition: opacity 0.5s ease; /* Smooth fade effect */
-  }
-  .scroll-indicator.hidden {
-    opacity: 0;
-    pointer-events: none; /* Prevents clicking on invisible element */
-  }
-  .scroll-indicator svg {
-    width: 24px;
-    height: 24px;
-    stroke: var(--accent);
-    stroke-width: 2.5;
-    fill: none;
-  }
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-8px); }
-    60% { transform: translateY(-4px); }
-  }
+  .scroll-indicator {text-align: center;color: var(--muted);font-size: 0.9rem;font-weight: 600;margin-top: 15px;margin-bottom: 30px;display: flex;flex-direction: column;align-items: center;gap: 5px;animation: bounce 2s infinite;transition: opacity 0.5s ease;}
+  .scroll-indicator.hidden {opacity: 0;pointer-events: none;}
+  .scroll-indicator svg {width: 24px;height: 24px;stroke: var(--accent);stroke-width: 2.5;fill: none;}
+  @keyframes bounce {0%, 20%, 50%, 80%, 100% { transform: translateY(0); }40% { transform: translateY(-8px); }60% { transform: translateY(-4px); }}
 
   section{margin-top:44px;}
   h2{font-size:1.4rem;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--soft);}
@@ -73,6 +46,49 @@
   .fact{background:var(--soft);border-radius:14px;padding:16px;text-align:center;}
   .fact strong{display:block;font-size:1.1rem;color:var(--accent);}
   .fact span{font-size:.85rem;color:var(--muted);}
+  
+  /* --- GAME STYLES --- */
+  .game-container {
+    background: var(--ink);
+    border-radius: 18px;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .game-container h3 { font-size: 1.5rem; margin-bottom: 10px; }
+  .game-container p { opacity: 0.8; margin-bottom: 20px; font-size: 0.95rem; }
+  .game-btn {
+    background: var(--accent); color: white; border: none;
+    padding: 12px 30px; border-radius: 999px;
+    font-weight: bold; font-size: 1.1rem; cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .game-btn:hover { transform: scale(1.05); }
+  .play-area {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: none; cursor: crosshair;
+  }
+  .mouse {
+    position: absolute; font-size: 2.5rem; cursor: pointer;
+    user-select: none; transition: transform 0.1s;
+  }
+  .mouse:active { transform: scale(0.8); }
+  .score-board {
+    position: absolute; top: 15px; right: 20px;
+    font-size: 1.2rem; font-weight: bold; color: var(--accent);
+  }
+  .timer-board {
+    position: absolute; top: 15px; left: 20px;
+    font-size: 1.2rem; font-weight: bold; color: #fff;
+  }
+
   .gallery{display:grid;gap:12px;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));grid-auto-rows: 280px; }
   .gallery img {width:100%;height:100%;object-fit:cover;border-radius:14px;display:block;background-color: var(--soft); transition:transform .2s;cursor: zoom-in;}
   .gallery img:hover { transform:scale(1.03); }
@@ -82,12 +98,14 @@
   .play-btn {position: absolute;top: 50%; left: 50%;transform: translate(-50%, -50%);width: 64px; height: 64px;background: rgba(0, 0, 0, 0.6);border-radius: 50%;display: flex;justify-content: center;align-items: center;color: white;pointer-events: none;transition: background .2s, transform .2s;box-shadow: 0 4px 12px rgba(0,0,0,0.3);}
   .video-wrapper:hover .play-btn {background: var(--accent);transform: translate(-50%, -50%) scale(1.1);}
   .play-btn svg {width: 32px; height: 32px;margin-left: 4px;}
+  
   .cols{display:grid;gap:24px;grid-template-columns:1fr 1fr;}
   @media(max-width:600px){.cols{grid-template-columns:1fr;}}
   ul{list-style:none;}
   ul li{padding:8px 0 8px 28px;position:relative;}
   ul li::before{content:"✓";position:absolute;left:0;top:8px;color:var(--accent);font-weight:700;}
   ul li.no::before{content:"✗";color:#c0392b;}
+  
   .contact{background:var(--ink);color:#fff;border-radius:20px;padding:36px 24px;text-align:center;margin-top:50px;box-shadow: 0 10px 30px rgba(0,0,0,.15);}
   .contact h2{color:#fff;border-color:rgba(255,255,255,.2);}
   .contact p{margin-bottom:22px;opacity:.85;}
@@ -95,27 +113,28 @@
   .btn:hover{transform:translateY(-2px);opacity:.92;}
   footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 20px 10px;}
 
+  /* --- SHARE BUTTONS --- */
+  .share-section { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--soft); }
+  .share-section p { font-size: 0.95rem; color: var(--muted); margin-bottom: 10px; font-weight: 600;}
+  .share-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #25D366; color: white; text-decoration: none;
+    padding: 10px 20px; border-radius: 8px; font-weight: bold;
+    transition: opacity 0.2s;
+  }
+  .share-btn:hover { opacity: 0.9; }
+
   /* --- LIGHTBOX CSS --- */
   #lightbox {display: none; position: fixed;top: 0; left: 0; width: 100%; height: 100%;background: rgba(0, 0, 0, 0.9); z-index: 1000;justify-content: center;align-items: center;}
   #lightbox-content {display: flex;justify-content: center;align-items: center;width: 100%;height: 100%;overflow: hidden; padding: 40px;}
   #lightbox img, #lightbox video {max-width: 100%;max-height: 90vh;border-radius: 8px;object-fit: contain;transition: transform 0.3s ease;}
-  
   .nav-btn {position: absolute;top: 50%;transform: translateY(-50%);background: rgba(255, 255, 255, 0.15);color: white;border: none;font-size: 3rem;width: 60px;height: 60px;border-radius: 50%;cursor: pointer;z-index: 1010;display: flex;justify-content: center;align-items: center;transition: background 0.2s, transform 0.2s;}
   .nav-btn:hover { background: var(--accent); }
   .prev { left: 20px; padding-right: 5px; }
   .next { right: 20px; padding-left: 5px; }
-  
   #zoomBtn {position: absolute;top: 20px;right: 20px;background: rgba(255, 255, 255, 0.15);color: white;border: none;padding: 10px 20px;border-radius: 8px;font-size: 1rem;cursor: pointer;z-index: 1010;transition: background 0.2s;display: flex;align-items: center;gap: 8px;}
   #zoomBtn:hover { background: var(--accent); }
-
-  #closeBtn {
-    position: absolute; top: 20px; left: 20px;
-    background: rgba(255, 255, 255, 0.15); color: white; border: none;
-    font-size: 1.5rem; font-weight: bold; width: 44px; height: 44px;
-    border-radius: 50%; cursor: pointer; z-index: 1010;
-    display: flex; justify-content: center; align-items: center;
-    transition: background 0.2s;
-  }
+  #closeBtn {position: absolute; top: 20px; left: 20px;background: rgba(255, 255, 255, 0.15); color: white; border: none;font-size: 1.5rem; font-weight: bold; width: 44px; height: 44px;border-radius: 50%; cursor: pointer; z-index: 1010;display: flex; justify-content: center; align-items: center;transition: background 0.2s;}
   #closeBtn:hover { background: #c0392b; }
 
   @media (max-width: 600px) {
@@ -140,7 +159,6 @@
 
     <img class="hero lightbox-trigger" src="1.jpg" alt="Hammicha the orange and white cat">
 
-    <!-- Scroll Indicator -->
     <div class="scroll-indicator" id="scrollHint">
       Scroll down to see more
       <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
@@ -177,10 +195,23 @@
       </p>
     </section>
 
+    <!-- NEW: MINI GAME SECTION -->
+    <section>
+      <h2>Play with Hammicha!</h2>
+      <div class="game-container" id="gameContainer">
+        <h3>🐭 Catch the Toy Mouse!</h3>
+        <p>Hammicha loves to hunt. Click the mice as fast as you can in 10 seconds!</p>
+        <button class="game-btn" id="startGameBtn" onclick="startGame()">Start Game</button>
+        
+        <div class="score-board" id="scoreBoard" style="display:none;">Score: 0</div>
+        <div class="timer-board" id="timerBoard" style="display:none;">Time: 10s</div>
+        <div class="play-area" id="playArea"></div>
+      </div>
+    </section>
+
     <section>
       <h2>More Photos & Videos of Hammicha</h2>
       <div class="gallery">
-        
         <img class="lightbox-trigger" src="2.jpg" alt="Hammicha relaxing outside on the grass">
         <img class="lightbox-trigger" src="3.jpg" alt="Hammicha being adventurous and climbing high">
         <img class="lightbox-trigger" src="4.jpg" alt="Hammicha sleeping curled up with her blue toy">
@@ -201,7 +232,6 @@
 
         <img class="lightbox-trigger" src="7.jpg" alt="Hammicha being held wearing a pink harness">
         <img class="lightbox-trigger" src="8.jpg" alt="Hammicha sunbathing with her toy mouse">
-
       </div>
     </section>
 
@@ -239,6 +269,15 @@
       </a>
     </div>
 
+    <!-- NEW: SHARE SECTION -->
+    <div class="share-section">
+      <p>Help Hammicha find her home by sharing her profile!</p>
+      <a href="https://api.whatsapp.com/send?text=Meet%20Hammicha!%20A%20playful%20cat%20looking%20for%20a%20loving%20home%20in%20Amman.%20Check%20out%20her%20profile%20here:%20https://ahmadalsaadi995.github.io/hammicha-adoption/" target="_blank" class="share-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Share on WhatsApp
+      </a>
+    </div>
+
     <footer>
       Serious inquiries only · Home screening applies · Ahmad, Amman
     </footer>
@@ -255,7 +294,7 @@
 </div>
 
 <script>
-  // 1. Lightbox Logic
+  // --- 1. LIGHTBOX LOGIC ---
   const mediaElements = document.querySelectorAll('.lightbox-trigger');
   let currentIndex = 0;
   let isZoomed = false;
@@ -347,18 +386,129 @@
     }
   });
 
-  // 2. NEW: Scroll Indicator Fade Logic
+  // --- 2. SCROLL INDICATOR LOGIC ---
   const scrollHint = document.getElementById('scrollHint');
-  
   window.addEventListener('scroll', () => {
-    // If the user scrolls down more than 100 pixels, hide the indicator
     if (window.scrollY > 100) {
       scrollHint.classList.add('hidden');
     } else {
-      // If they scroll back to the top, show it again
       scrollHint.classList.remove('hidden');
     }
   });
+
+  // --- 3. MINI GAME LOGIC ---
+  let score = 0;
+  let timeLeft = 10;
+  let gameInterval;
+  let mouseInterval;
+  let isGameRunning = false;
+
+  const startBtn = document.getElementById('startGameBtn');
+  const scoreBoard = document.getElementById('scoreBoard');
+  const timerBoard = document.getElementById('timerBoard');
+  const playArea = document.getElementById('playArea');
+  const gameContainer = document.getElementById('gameContainer');
+
+  function startGame() {
+    if (isGameRunning) return;
+    isGameRunning = true;
+    score = 0;
+    timeLeft = 10;
+    
+    startBtn.style.display = 'none';
+    scoreBoard.style.display = 'block';
+    timerBoard.style.display = 'block';
+    playArea.style.display = 'block';
+    scoreBoard.textContent = `Score: ${score}`;
+    timerBoard.textContent = `Time: ${timeLeft}s`;
+    playArea.innerHTML = ''; // Clear old mice
+
+    // Timer
+    gameInterval = setInterval(() => {
+      timeLeft--;
+      timerBoard.textContent = `Time: ${timeLeft}s`;
+      if (timeLeft <= 0) {
+        endGame();
+      }
+    }, 1000);
+
+    // Spawn mice
+    mouseInterval = setInterval(spawnMouse, 600);
+  }
+
+  function spawnMouse() {
+    // Remove existing mouse so only one is on screen
+    playArea.innerHTML = ''; 
+    
+    const mouse = document.createElement('div');
+    mouse.classList.add('mouse');
+    mouse.textContent = '🐭';
+    
+    // Random position within the play area
+    const x = Math.random() * (playArea.clientWidth - 50);
+    const y = Math.random() * (playArea.clientHeight - 50);
+    
+    mouse.style.left = `${x}px`;
+    mouse.style.top = `${y}px`;
+
+    mouse.addEventListener('mousedown', (e) => {
+      e.stopPropagation(); // Prevent closing lightbox if clicked
+      score++;
+      scoreBoard.textContent = `Score: ${score}`;
+      mouse.remove(); // Disappear on click
+    });
+
+    // For mobile touch
+    mouse.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      score++;
+      scoreBoard.textContent = `Score: ${score}`;
+      mouse.remove();
+    });
+
+    playArea.appendChild(mouse);
+  }
+
+  function endGame() {
+    isGameRunning = false;
+    clearInterval(gameInterval);
+    clearInterval(mouseInterval);
+    playArea.innerHTML = '';
+    
+    scoreBoard.style.display = 'none';
+    timerBoard.style.display = 'none';
+    playArea.style.display = 'none';
+    
+    startBtn.style.display = 'inline-block';
+    
+    let message = "";
+    if (score >= 10) message = "Wow! You're a natural! You and Hammicha are a purr-fect match! 🐾";
+    else if (score >= 5) message = "Good job! Hammicha would love to play with you. 🧶";
+    else message = "Hammicha is too fast for you! Want to try again? 😸";
+
+    gameContainer.innerHTML = `
+      <h3 style="color:var(--accent); margin-bottom: 10px;">Game Over!</h3>
+      <p style="font-size: 1.2rem; margin-bottom: 15px;">You caught <strong>${score}</strong> mice!</p>
+      <p style="margin-bottom: 20px; font-style: italic;">"${message}"</p>
+      <button class="game-btn" onclick="resetGame()">Play Again</button>
+    `;
+  }
+
+  function resetGame() {
+    gameContainer.innerHTML = `
+      <h3>🐭 Catch the Toy Mouse!</h3>
+      <p>Hammicha loves to hunt. Click the mice as fast as you can in 10 seconds!</p>
+      <button class="game-btn" id="startGameBtn" onclick="startGame()">Start Game</button>
+      <div class="score-board" id="scoreBoard" style="display:none;">Score: 0</div>
+      <div class="timer-board" id="timerBoard" style="display:none;">Time: 10s</div>
+      <div class="play-area" id="playArea"></div>
+    `;
+    // Re-assign variables because we replaced the HTML
+    startBtn = document.getElementById('startGameBtn');
+    scoreBoard = document.getElementById('scoreBoard');
+    timerBoard = document.getElementById('timerBoard');
+    playArea = document.getElementById('playArea');
+  }
 </script>
 </body>
 </html>
