@@ -49,7 +49,7 @@
   
   /* --- ATARI GAME STYLES --- */
   .game-wrapper {
-    background: #2a1b38; /* Deep twilight purple */
+    background: #1e1b4b;
     border-radius: 18px;
     overflow: hidden;
     position: relative;
@@ -59,7 +59,7 @@
   canvas {
     display: block;
     width: 100%;
-    height: 400px; /* BIGGER SCREEN */
+    height: 400px;
     image-rendering: pixelated;
   }
   .game-overlay {
@@ -69,7 +69,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(42, 27, 56, 0.85);
+    background: rgba(30, 27, 75, 0.85);
     color: #fff;
     text-align: center;
     padding: 20px;
@@ -187,12 +187,12 @@
 
     <!-- UPGRADED ATARI GAME -->
     <section>
-      <h2>Play Hammicha's Midnight Run!</h2>
-      <p style="margin-bottom: 15px; font-size: 0.95rem; color: var(--muted);">Help Hammicha run exactly <strong>25 meters</strong> to get back to her cozy home! Catch treats along the way.<br><strong>Tap or press Spacebar to jump.</strong></p>
+      <h2>Play Hammicha's Amman Run!</h2>
+      <p style="margin-bottom: 15px; font-size: 0.95rem; color: var(--muted);">Help Hammicha run 25 meters through Amman to get back home. Catch the heart at 10m for a second chance!<br><strong>Tap or press Spacebar to jump.</strong></p>
       <div class="game-wrapper">
         <canvas id="gameCanvas"></canvas>
         <div class="game-overlay" id="gameOverlay">
-          <h3>Midnight Run: Amman</h3>
+          <h3>Hammicha's Amman Run</h3>
           <p>Press Space or Tap to Start</p>
           <button class="game-btn" onclick="startGame()">Start Game</button>
         </div>
@@ -392,7 +392,7 @@
 
   function resizeCanvas() {
     canvas.width = canvas.parentElement.clientWidth;
-    canvas.height = 400; // Larger screen
+    canvas.height = 400; 
     ctx.imageSmoothingEnabled = false; 
   }
   window.addEventListener('resize', resizeCanvas);
@@ -407,6 +407,11 @@
   let jumpForce = -12;
   let frames = 0;
 
+  // Invincibility & Respawn Logic
+  let hasHeart = false;
+  let isInvincible = false;
+  let invincibleTimer = 0;
+
   const player = {
     x: 60,
     y: 0,
@@ -420,24 +425,20 @@
 
   let obstacles = [];
   let rewards = [];
-  let buildings = [];
   let winHearts = [];
   let house = { x: -200, y: 0, width: 150, height: 150 };
+  let landmarks = {};
 
   let treatsCaught = 0;
   let wetFoodCaught = 0;
 
   function initBackground() {
-    buildings = [];
-    for (let i = 0; i < 10; i++) {
-      buildings.push({
-        x: i * 100,
-        width: 70 + Math.random() * 30,
-        height: 100 + Math.random() * 150,
-        color: '#4c1d95', // Purple buildings for sunset
-        windows: Array.from({ length: 15 }, () => Math.random() > 0.4)
-      });
-    }
+    landmarks = {
+      theatreX: canvas.width * 0.5,
+      hotelX: canvas.width * 0.8,
+      flagX: canvas.width * 0.2,
+      bgX: 0
+    };
   }
 
   function startGame() {
@@ -453,6 +454,9 @@
     wetFoodCaught = 0;
     frames = 0;
     house.x = -200;
+    hasHeart = false;
+    isInvincible = false;
+    invincibleTimer = 0;
     
     player.y = canvas.height - player.height - 20; 
     player.vy = 0;
@@ -490,48 +494,38 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     frames++;
 
-    // 1. Sky Gradient (Sunset)
+    // 1. Sky Gradient (Calm Sunset)
     let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#f472b6'); // Pink
-    gradient.addColorStop(0.5, '#f97316'); // Orange
-    gradient.addColorStop(1, '#4c1d95'); // Purple
+    gradient.addColorStop(0, '#fda4af'); // Soft pink
+    gradient.addColorStop(0.6, '#fcd34d'); // Soft yellow/orange
+    gradient.addColorStop(1, '#a78bfa'); // Soft purple
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. Draw Buildings (Parallax)
-    buildings.forEach(b => {
-      if (!isWinning) b.x -= speed * 0.4;
-      
-      if (b.x + b.width < 0) {
-        b.x = canvas.width + 10;
-        b.height = 100 + Math.random() * 150;
-      }
-      
-      ctx.fillStyle = b.color;
-      ctx.fillRect(b.x, canvas.height - 20 - b.height, b.width, b.height);
-      
-      b.windows.forEach((isLit, i) => {
-        if (isLit) {
-          ctx.fillStyle = (i % 3 === 0) ? '#fbbf24' : '#38bdf8';
-          let wx = b.x + 10 + (i % 4) * 15;
-          let wy = (canvas.height - 20 - b.height) + 15 + Math.floor(i / 4) * 20;
-          if (wx < b.x + b.width - 10 && wy < canvas.height - 30) {
-            ctx.fillRect(wx, wy, 6, 8);
-          }
-        }
-      });
-    });
-
-    // 3. Ground
-    ctx.fillStyle = '#1e1b4b';
-    ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
-    ctx.fillStyle = '#6b7280'; // Light grey road markings for contrast
-    for (let i = 0; i < canvas.width + 50; i += 60) {
-      let offset = isWinning ? 0 : (frames * speed) % 60;
-      ctx.fillRect(i - offset, canvas.height - 10, 30, 4);
+    // 2. Scroll Background VERY gently to avoid dizziness
+    if (!isWinning) {
+      landmarks.theatreX -= speed * 0.1;
+      landmarks.hotelX -= speed * 0.15;
+      landmarks.flagX -= speed * 0.05;
     }
 
-    // 4. Player Physics
+    // Loop backgrounds
+    if (landmarks.theatreX < -200) landmarks.theatreX = canvas.width + 100;
+    if (landmarks.hotelX < -100) landmarks.hotelX = canvas.width + 200;
+    if (landmarks.flagX < -100) landmarks.flagX = canvas.width + 50;
+
+    // Draw Amman Landmarks
+    drawRomanTheatre(landmarks.theatreX, canvas.height - 60);
+    drawRoyalHotel(landmarks.hotelX, canvas.height - 120);
+    drawJordanianFlag(landmarks.flagX, canvas.height - 90, frames);
+
+    // 3. Ground (No moving lines!)
+    ctx.fillStyle = '#334155'; // Soft dark grey asphalt
+    ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+    ctx.fillStyle = '#1e293b'; // Darker bottom border
+    ctx.fillRect(0, canvas.height - 5, canvas.width, 5);
+
+    // 4. Player Physics & Invincibility
     if (!isWinning) {
       player.vy += gravity;
       player.y += player.vy;
@@ -543,75 +537,69 @@
       player.isJumping = false;
     }
 
+    if (isInvincible) {
+      invincibleTimer--;
+      if (invincibleTimer <= 0) isInvincible = false;
+    }
+
     // 5. WINNING LOGIC
     if (distance >= 25 && !isWinning) {
       isWinning = true;
       obstacles = [];
       rewards = [];
       player.isKissing = true;
-      // Trigger win sequence
       setTimeout(triggerWinSequence, 500); 
     }
 
     if (isWinning) {
-      // Slide the house in
-      if (house.x < canvas.width - 180) {
-        house.x += 4;
-      }
+      if (house.x < canvas.width - 180) house.x += 4;
       drawHouse(house.x, canvas.height - 20 - house.height, house.width, house.height);
       
-      // Generate kisses/hearts
       if (frames % 10 === 0) {
         winHearts.push({
-          x: player.x + 20,
-          y: player.y + 10,
-          vx: (Math.random() - 0.5) * 2,
-          vy: -2 - Math.random() * 2,
-          life: 100
+          x: player.x + 20, y: player.y + 10,
+          vx: (Math.random() - 0.5) * 2, vy: -2 - Math.random() * 2, life: 100
         });
       }
     }
 
-    // Draw floating hearts (only during win)
     winHearts.forEach((h, index) => {
-      h.x += h.vx;
-      h.y += h.vy;
-      h.life--;
+      h.x += h.vx; h.y += h.vy; h.life--;
       ctx.fillStyle = `rgba(239, 68, 68, ${h.life / 100})`;
       drawHeart(h.x, h.y, 10);
       if (h.life <= 0) winHearts.splice(index, 1);
     });
 
-    drawPixelCat(player.x, player.y, player.isJumping, player.isCrying, player.isKissing);
+    // Flash player if invincible
+    if (!isInvincible || Math.floor(frames / 5) % 2 === 0) {
+      drawPixelCat(player.x, player.y, player.isJumping, player.isCrying, player.isKissing);
+    }
 
-    // 6. Spawning Logic (Only if not winning)
+    // 6. Spawning Logic
     if (!isWinning) {
       // Obstacles
       if (frames % Math.floor(100 - speed * 3) === 0) {
-        let types = ['car', 'mouse', 'cucumber', 'cat'];
+        let types = ['bus', 'mouse', 'cucumber', 'cat'];
         let type = types[Math.floor(Math.random() * types.length)];
-        let obsWidth = type === 'car' ? 50 : (type === 'cucumber' ? 35 : 25);
-        let obsHeight = type === 'car' ? 30 : (type === 'cucumber' ? 12 : 22);
+        let obsWidth = type === 'bus' ? 60 : (type === 'cucumber' ? 35 : 25);
+        let obsHeight = type === 'bus' ? 35 : (type === 'cucumber' ? 12 : 22);
         
         obstacles.push({
           x: canvas.width,
           y: canvas.height - 20 - obsHeight,
-          width: obsWidth,
-          height: obsHeight,
-          type: type
+          width: obsWidth, height: obsHeight, type: type
         });
       }
 
-      // Rewards
+      // Rewards & Heart at 10m
       if (distance === 10) {
-        rewards.push({ x: canvas.width, y: canvas.height - 120, type: 'treat', speed: speed });
+        rewards.push({ x: canvas.width, y: canvas.height - 120, type: 'heart', speed: speed });
+        rewards.push({ x: canvas.width + 150, y: canvas.height - 120, type: 'treat', speed: speed });
       } else if (distance === 20) {
         rewards.push({ x: canvas.width, y: canvas.height - 120, type: 'wetfood', speed: speed });
-      } else if (distance > 22 && distance < 25 && frames % 80 === 0) {
-        rewards.push({ x: canvas.width, y: canvas.height - 140, type: Math.random() > 0.5 ? 'treat' : 'wetfood', speed: speed });
       }
 
-      // Update & Draw Obstacles
+      // Update Obstacles & Collision
       for (let i = obstacles.length - 1; i >= 0; i--) {
         let obs = obstacles[i];
         obs.x -= speed;
@@ -623,22 +611,35 @@
           player.y + 10 < obs.y + obs.height &&
           player.y + player.height > obs.y
         ) {
-          gameOver();
-          return;
+          if (isInvincible) {
+            // Ignore collision
+          } else if (hasHeart) {
+            // Use Heart to respawn
+            hasHeart = false;
+            isInvincible = true;
+            invincibleTimer = 120; // 2 seconds at 60fps
+            obstacles = []; // Clear obstacles
+            // Draw a visual effect
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          } else {
+            gameOver();
+            return;
+          }
         }
 
         if (obs.x + obs.width < 0) {
           obstacles.splice(i, 1);
           distance++;
-          if (distance % 5 === 0) speed += 0.5; 
+          if (distance % 5 === 0) speed += 0.4; 
         }
       }
 
-      // Update & Draw Rewards
+      // Update Rewards
       for (let i = rewards.length - 1; i >= 0; i--) {
         let rew = rewards[i];
         rew.x -= speed;
-        rew.y = (canvas.height - 120) + Math.sin(frames * 0.1) * 20;
+        rew.y = (canvas.height - 120) + Math.sin(frames * 0.1) * 15;
         drawReward(rew);
 
         if (
@@ -647,11 +648,12 @@
           player.y < rew.y + 20 &&
           player.y + player.height > rew.y
         ) {
+          if (rew.type === 'heart') hasHeart = true;
           if (rew.type === 'treat') treatsCaught++;
           if (rew.type === 'wetfood') wetFoodCaught++;
           
           ctx.fillStyle = '#fff';
-          ctx.font = '16px "Courier New"';
+          ctx.font = 'bold 16px "Courier New"';
           ctx.fillText("+1", rew.x, rew.y - 10);
           rewards.splice(i, 1);
         } else if (rew.x < -20) {
@@ -667,6 +669,10 @@
     ctx.fillText(`DISTANCE: ${distance}m / 25m`, canvas.width - 240, 30);
     ctx.fillText(`🍪 x ${treatsCaught}`, 20, 30);
     ctx.fillText(`🥫 x ${wetFoodCaught}`, 130, 30);
+    if (hasHeart) {
+      ctx.fillStyle = '#ef4444';
+      drawHeart(230, 15, 16);
+    }
 
     gameLoop = requestAnimationFrame(update);
   }
@@ -676,9 +682,9 @@
     overlay.style.display = 'flex';
     overlay.innerHTML = `
       <h3 style="color:#f472b6;">Hammicha is Home!</h3>
-      <p style="font-size: 1.2rem; margin: 10px 0;">You ran ${distance} meters safely!</p>
+      <p style="font-size: 1.2rem; margin: 10px 0;">You ran ${distance} meters safely through Amman!</p>
       <p style="margin-bottom: 20px; max-width: 90%; margin-left: auto; margin-right: auto; line-height:1.4; color:#cbd5e1;">
-        She is sending you a big kiss for helping her! 💋<br>
+        She is sending you a big kiss! 💋<br>
         She caught <strong>${treatsCaught}</strong> treats and <strong>${wetFoodCaught}</strong> wet foods.<br><br>
         <strong style="color:#fbbf24;">She is ready for her new forever family. Will it be you?</strong>
       </p>
@@ -711,20 +717,18 @@
   // --- DRAWING HELPERS ---
   function drawGameOverState() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#f472b6');
-    gradient.addColorStop(1, '#4c1d95');
+    gradient.addColorStop(0, '#fda4af');
+    gradient.addColorStop(1, '#a78bfa');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#1e1b4b';
+    ctx.fillStyle = '#334155';
     ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
     
     drawPixelCat(player.x, player.y, false, true, false);
     
     if (player.isCrying) {
-      ctx.fillStyle = '#38bdf8'; // Blue tears
+      ctx.fillStyle = '#38bdf8'; 
       let tearY = player.y + 20 + (Date.now() / 100) % 30;
       ctx.fillRect(player.x + 12, tearY, 4, 8);
       ctx.fillRect(player.x + 28, tearY, 4, 8);
@@ -735,10 +739,10 @@
   function drawPixelCat(x, y, isJumping, isCrying, isKissing) {
     ctx.fillStyle = '#d97736';
     ctx.fillRect(x + 6, y + 12, 28, 28);
-    ctx.fillRect(x, y, 40, 20); // Head
-    ctx.fillRect(x, y - 8, 8, 8); // Ear
-    ctx.fillRect(x + 32, y - 8, 8, 8); // Ear
-    ctx.fillRect(x - 8, y + (isJumping ? 10 : 20), 14, 6); // Tail
+    ctx.fillRect(x, y, 40, 20); 
+    ctx.fillRect(x, y - 8, 8, 8); 
+    ctx.fillRect(x + 32, y - 8, 8, 8); 
+    ctx.fillRect(x - 8, y + (isJumping ? 10 : 20), 14, 6); 
     
     ctx.fillStyle = '#fff';
     ctx.fillRect(x + 15, y, 10, 20);
@@ -750,18 +754,14 @@
       ctx.fillRect(x + 24, y + 8, 8, 2);
       ctx.fillRect(x + 16, y + 16, 8, 2);
     } else if (isKissing) {
-      // Happy closed eyes
       ctx.fillRect(x + 8, y + 8, 8, 2);
       ctx.fillRect(x + 24, y + 8, 8, 2);
-      // Smile
       ctx.fillRect(x + 14, y + 14, 12, 2);
       ctx.fillRect(x + 12, y + 12, 2, 2);
       ctx.fillRect(x + 26, y + 12, 2, 2);
-      // Kiss mouth
-      ctx.fillStyle = '#ef4444'; // Red lips
+      ctx.fillStyle = '#ef4444'; 
       ctx.fillRect(x + 16, y + 18, 8, 4);
     } else {
-      // Normal eyes
       ctx.fillStyle = '#fff';
       ctx.fillRect(x + 8, y + 4, 8, 8);
       ctx.fillRect(x + 24, y + 4, 8, 8);
@@ -773,54 +773,151 @@
     }
   }
 
+  // --- AMMAN LANDMARKS ---
+  function drawRomanTheatre(x, y) {
+    // Base structure
+    ctx.fillStyle = '#94a3b8'; // Grey stone
+    ctx.fillRect(x, y, 120, 60);
+    ctx.fillStyle = '#64748b'; // Shadows
+    // Arches
+    for (let i = 0; i < 3; i++) {
+      ctx.fillRect(x + 10 + (i * 35), y + 10, 20, 20);
+      ctx.fillRect(x + 10 + (i * 35), y + 40, 20, 20);
+    }
+    // Top curved part
+    ctx.beginPath();
+    ctx.arc(x + 60, y, 60, Math.PI, 0);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fill();
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(x + 20, y - 20, 80, 20);
+  }
+
+  function drawRoyalHotel(x, y) {
+    // Main building
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(x, y, 50, 120);
+    // Iconic top pyramid
+    ctx.fillStyle = '#f1f5f9';
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y);
+    ctx.lineTo(x + 25, y - 30);
+    ctx.lineTo(x + 60, y);
+    ctx.fill();
+    // Windows
+    ctx.fillStyle = '#fbbf24';
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 3; j++) {
+        ctx.fillRect(x + 5 + (j * 15), y + 10 + (i * 25), 8, 12);
+      }
+    }
+  }
+
+  function drawJordanianFlag(x, y, time) {
+    // Pole
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(x, y, 4, 90);
+    
+    // Waving Flag (using sine wave)
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y);
+    for (let i = 0; i <= 60; i++) {
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      ctx.lineTo(x + 4 + i, y + wave);
+    }
+    for (let i = 60; i >= 0; i--) {
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      ctx.lineTo(x + 4 + i, y + 40 + wave);
+    }
+    ctx.fillStyle = '#000'; // Black stripe
+    ctx.fill();
+    
+    // White stripe
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y + 13);
+    for (let i = 0; i <= 60; i++) {
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      ctx.lineTo(x + 4 + i, y + 13 + wave);
+    }
+    for (let i = 60; i >= 0; i--) {
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      ctx.lineTo(x + 4 + i, y + 27 + wave);
+    }
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+
+    // Green stripe
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y + 27);
+    for (let i = 0; i <= 60; i++) {
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      ctx.lineTo(x + 4 + i, y + 27 + wave);
+    }
+    for (let i = 60; i >= 0; i--) {
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      ctx.lineTo(x + 4 + i, y + 40 + wave);
+    }
+    ctx.fillStyle = '#10b981'; // Green
+    ctx.fill();
+
+    // Red Triangle
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y);
+    ctx.lineTo(x + 30, y + 20);
+    ctx.lineTo(x + 4, y + 40);
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+    
+    ctx.restore();
+  }
+
   function drawHouse(x, y, w, h) {
-    // Wall
-    ctx.fillStyle = '#fcd34d'; // Warm yellow
+    ctx.fillStyle = '#fcd34d'; 
     ctx.fillRect(x + 20, y + 60, w - 40, h - 60);
-    // Roof
-    ctx.fillStyle = '#b91c1c'; // Red roof
+    ctx.fillStyle = '#b91c1c'; 
     ctx.beginPath();
     ctx.moveTo(x, y + 60);
     ctx.lineTo(x + w / 2, y);
     ctx.lineTo(x + w, y + 60);
     ctx.fill();
-    // Door
     ctx.fillStyle = '#78350f';
     ctx.fillRect(x + w / 2 - 15, y + 100, 30, 50);
-    // Window (lit)
     ctx.fillStyle = '#fef08a';
     ctx.fillRect(x + 35, y + 80, 25, 25);
     ctx.fillRect(x + w - 60, y + 80, 25, 25);
-    // Window cross
-    ctx.fillStyle = '#78350f';
-    ctx.fillRect(x + 45, y + 80, 4, 25);
-    ctx.fillRect(x + 35, y + 90, 25, 4);
   }
 
   function drawObstacle(obs) {
     ctx.fillStyle = '#000';
-    if (obs.type === 'car') {
-      ctx.fillStyle = '#ef4444'; // Bright red
-      ctx.fillRect(obs.x, obs.y + 10, obs.width, 20);
-      ctx.fillStyle = '#fff'; // White roof for contrast
-      ctx.fillRect(obs.x + 10, obs.y, obs.width - 20, 10);
-      ctx.fillStyle = '#111'; 
-      ctx.fillRect(obs.x + 5, obs.y + 25, 10, 10);
-      ctx.fillRect(obs.x + obs.width - 15, obs.y + 25, 10, 10);
-      ctx.fillStyle = '#fef08a'; // Headlight
-      ctx.fillRect(obs.x + 2, obs.y + 15, 6, 6);
+    if (obs.type === 'bus') {
+      // Amman BRT Bus (Yellow/Red)
+      ctx.fillStyle = '#fbbf24'; // Yellow body
+      ctx.fillRect(obs.x, obs.y + 5, obs.width, 25);
+      ctx.fillStyle = '#ef4444'; // Red stripe
+      ctx.fillRect(obs.x, obs.y + 15, obs.width, 8);
+      // Windows
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(obs.x + 5, obs.y + 8, 10, 6);
+      ctx.fillRect(obs.x + 20, obs.y + 8, 10, 6);
+      ctx.fillRect(obs.x + 35, obs.y + 8, 10, 6);
+      ctx.fillRect(obs.x + 50, obs.y + 8, 5, 6);
+      // Wheels
+      ctx.fillStyle = '#111';
+      ctx.fillRect(obs.x + 10, obs.y + 30, 10, 8);
+      ctx.fillRect(obs.x + obs.width - 20, obs.y + 30, 10, 8);
     } 
     else if (obs.type === 'mouse') {
-      ctx.fillStyle = '#f8fafc'; // White mouse
+      ctx.fillStyle = '#f8fafc'; 
       ctx.fillRect(obs.x, obs.y + 8, obs.width, 12);
-      ctx.fillRect(obs.x + 4, obs.y, 10, 8); // Ears
-      ctx.fillStyle = '#f472b6'; // Pink tail
+      ctx.fillRect(obs.x + 4, obs.y, 10, 8); 
+      ctx.fillStyle = '#f472b6'; 
       ctx.fillRect(obs.x - 8, obs.y + 15, 8, 2);
-      ctx.fillStyle = '#000'; // Eye
+      ctx.fillStyle = '#000'; 
       ctx.fillRect(obs.x + obs.width - 6, obs.y + 10, 2, 2);
     } 
     else if (obs.type === 'cucumber') {
-      ctx.fillStyle = '#22c55e'; // Bright green
+      ctx.fillStyle = '#22c55e'; 
       ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
       ctx.fillStyle = '#166534';
       ctx.fillRect(obs.x + 5, obs.y, 4, obs.height);
@@ -828,26 +925,26 @@
       ctx.fillRect(obs.x + 25, obs.y, 4, obs.height);
     } 
     else if (obs.type === 'cat') {
-      ctx.fillStyle = '#8b5cf6'; // Purple/Blue rival cat so it stands out
+      ctx.fillStyle = '#8b5cf6'; 
       ctx.fillRect(obs.x + 5, obs.y + 5, 15, 15);
       ctx.fillRect(obs.x, obs.y, 25, 12);
-      ctx.fillRect(obs.x, obs.y - 4, 4, 4); // Ear
-      ctx.fillRect(obs.x + 21, obs.y - 4, 4, 4); // Ear
-      ctx.fillStyle = '#fbbf24'; // Yellow eyes
+      ctx.fillRect(obs.x, obs.y - 4, 4, 4); 
+      ctx.fillRect(obs.x + 21, obs.y - 4, 4, 4); 
+      ctx.fillStyle = '#fbbf24'; 
       ctx.fillRect(obs.x + 4, obs.y + 4, 5, 5);
       ctx.fillRect(obs.x + 16, obs.y + 4, 5, 5);
     }
   }
 
   function drawReward(rew) {
-    if (rew.type === 'treat') {
+    if (rew.type === 'heart') {
+      ctx.fillStyle = '#ef4444';
+      drawHeart(rew.x, rew.y, 20);
+    } else if (rew.type === 'treat') {
       ctx.fillStyle = '#eab308';
       ctx.fillRect(rew.x, rew.y, 20, 15);
       ctx.fillStyle = '#854d0e';
       ctx.fillRect(rew.x + 5, rew.y + 3, 10, 9);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(rew.x + 18, rew.y - 4, 2, 6);
-      ctx.fillRect(rew.x + 16, rew.y - 2, 6, 2);
     } else {
       ctx.fillStyle = '#ef4444';
       ctx.fillRect(rew.x, rew.y, 22, 18);
@@ -855,8 +952,6 @@
       ctx.fillRect(rew.x - 1, rew.y - 2, 24, 4);
       ctx.fillStyle = '#fff';
       ctx.fillRect(rew.x + 4, rew.y + 5, 14, 8);
-      ctx.fillStyle = '#f472b6';
-      ctx.fillRect(rew.x + 6, rew.y + 7, 10, 4);
     }
   }
 
