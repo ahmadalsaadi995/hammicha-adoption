@@ -47,20 +47,20 @@
   .fact strong{display:block;font-size:1.1rem;color:var(--accent);}
   .fact span{font-size:.85rem;color:var(--muted);}
   
-  /* --- NEW ATARI GAME STYLES --- */
+  /* --- ATARI GAME STYLES --- */
   .game-wrapper {
-    background: #1a1a1a;
+    background: #0f172a; /* Deep night blue */
     border-radius: 18px;
     overflow: hidden;
     position: relative;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-    border: 4px solid #333;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.2);
+    border: 4px solid #1e293b;
   }
   canvas {
     display: block;
     width: 100%;
-    height: 250px;
-    image-rendering: pixelated; /* Gives it that retro Atari look */
+    height: 320px;
+    image-rendering: pixelated; /* Retro look */
   }
   .game-overlay {
     position: absolute;
@@ -69,21 +69,22 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(26, 26, 26, 0.85);
+    background: rgba(15, 23, 42, 0.85);
     color: #fff;
     text-align: center;
     padding: 20px;
     transition: opacity 0.3s;
   }
-  .game-overlay h3 { font-family: 'Courier New', monospace; font-size: 1.5rem; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;}
-  .game-overlay p { font-family: 'Courier New', monospace; font-size: 1rem; margin-bottom: 20px; color: #ccc;}
+  .game-overlay h3 { font-family: 'Courier New', monospace; font-size: 1.8rem; color: #f472b6; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 0px #000;}
+  .game-overlay p { font-family: 'Courier New', monospace; font-size: 1rem; margin-bottom: 15px; color: #cbd5e1;}
   .game-btn {
     background: var(--accent); color: white; border: 2px solid #fff;
     padding: 10px 24px; font-family: 'Courier New', monospace;
     font-weight: bold; font-size: 1rem; cursor: pointer;
     text-transform: uppercase; transition: transform 0.1s;
+    box-shadow: 3px 3px 0px #000;
   }
-  .game-btn:active { transform: scale(0.95); }
+  .game-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px #000;}
 
   .gallery{display:grid;gap:12px;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));grid-auto-rows: 280px; }
   .gallery img {width:100%;height:100%;object-fit:cover;border-radius:14px;display:block;background-color: var(--soft); transition:transform .2s;cursor: zoom-in;}
@@ -109,18 +110,11 @@
   .btn:hover{transform:translateY(-2px);opacity:.92;}
   footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 20px 10px;}
 
-  /* --- SHARE BUTTONS --- */
   .share-section { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--soft); }
   .share-section p { font-size: 0.95rem; color: var(--muted); margin-bottom: 10px; font-weight: 600;}
-  .share-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: #25D366; color: white; text-decoration: none;
-    padding: 10px 20px; border-radius: 8px; font-weight: bold;
-    transition: opacity 0.2s;
-  }
+  .share-btn {display: inline-flex; align-items: center; gap: 8px;background: #25D366; color: white; text-decoration: none;padding: 10px 20px; border-radius: 8px; font-weight: bold;transition: opacity 0.2s;}
   .share-btn:hover { opacity: 0.9; }
 
-  /* --- LIGHTBOX CSS --- */
   #lightbox {display: none; position: fixed;top: 0; left: 0; width: 100%; height: 100%;background: rgba(0, 0, 0, 0.9); z-index: 1000;justify-content: center;align-items: center;}
   #lightbox-content {display: flex;justify-content: center;align-items: center;width: 100%;height: 100%;overflow: hidden; padding: 40px;}
   #lightbox img, #lightbox video {max-width: 100%;max-height: 90vh;border-radius: 8px;object-fit: contain;transition: transform 0.3s ease;}
@@ -191,15 +185,15 @@
       </p>
     </section>
 
-    <!-- NEW: ATARI RUNNER GAME SECTION -->
+    <!-- UPGRADED ATARI GAME -->
     <section>
       <h2>Play Hammicha's Midnight Run!</h2>
-      <p style="margin-bottom: 15px; font-size: 0.95rem; color: var(--muted);">Help Hammicha jump over the obstacles! Tap the screen or press the Spacebar to jump.</p>
+      <p style="margin-bottom: 15px; font-size: 0.95rem; color: var(--muted);">Help Hammicha dodge the streets of Amman! Catch treats at 10m and wet food at 20m. <br><strong>Tap or press Spacebar to jump.</strong></p>
       <div class="game-wrapper">
         <canvas id="gameCanvas"></canvas>
         <div class="game-overlay" id="gameOverlay">
-          <h3>Hammicha's Midnight Run</h3>
-          <p>Press Space or Tap to Jump</p>
+          <h3>Midnight Run: Amman</h3>
+          <p>Press Space or Tap to Start</p>
           <button class="game-btn" onclick="startGame()">Start Game</button>
         </div>
       </div>
@@ -391,50 +385,82 @@
     }
   });
 
-  // --- 3. ATARI RUNNER GAME LOGIC ---
+  // --- 3. THE ATARI GAME ENGINE ---
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   const overlay = document.getElementById('gameOverlay');
 
-  // Set canvas resolution
+  // Make it responsive but keep fixed pixel height
   function resizeCanvas() {
     canvas.width = canvas.parentElement.clientWidth;
-    canvas.height = 250; // Matches CSS height
+    canvas.height = 320;
+    ctx.imageSmoothingEnabled = false; // Crucial for pixel art
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
   let gameLoop;
   let isPlaying = false;
-  let score = 0;
+  let distance = 0;
   let speed = 5;
-  let gravity = 0.6;
-  let jumpForce = -11;
+  let gravity = 0.65;
+  let jumpForce = -11.5;
+  let frames = 0;
 
-  // Player (Hammicha)
+  // Player State
   const player = {
-    x: 50,
+    x: 60,
     y: 0,
-    width: 30,
-    height: 30,
+    width: 36,
+    height: 36,
     vy: 0,
     isJumping: false,
-    color: '#d97736' // Orange
+    isCrying: false
   };
 
   let obstacles = [];
-  let frameCount = 0;
+  let rewards = [];
+  let hearts = [];
+  let buildings = [];
+  
+  let treatsCaught = 0;
+  let wetFoodCaught = 0;
+
+  // Initialize Background Elements
+  function initBackground() {
+    buildings = [];
+    for (let i = 0; i < 10; i++) {
+      buildings.push({
+        x: i * 80,
+        width: 60 + Math.random() * 20,
+        height: 80 + Math.random() * 100,
+        color: '#1e293b', // Dark slate
+        windows: Array.from({ length: 10 }, () => Math.random() > 0.4) // Random lit windows
+      });
+    }
+    hearts = [];
+    for (let i = 0; i < 5; i++) {
+      hearts.push({ x: Math.random() * 800, y: Math.random() * 300, speed: 0.5 + Math.random() });
+    }
+  }
 
   function startGame() {
     overlay.style.display = 'none';
     isPlaying = true;
-    score = 0;
+    distance = 0;
     speed = 5;
     obstacles = [];
-    frameCount = 0;
-    player.y = canvas.height - player.height - 20; // Ground level
+    rewards = [];
+    treatsCaught = 0;
+    wetFoodCaught = 0;
+    frames = 0;
+    
+    player.y = canvas.height - player.height - 20; 
     player.vy = 0;
     player.isJumping = false;
+    player.isCrying = false;
+    
+    initBackground();
     
     if (gameLoop) cancelAnimationFrame(gameLoop);
     gameLoop = requestAnimationFrame(update);
@@ -450,142 +476,362 @@
 
   // Controls
   document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-      e.preventDefault(); // Prevent scrolling down
-      jump();
-    }
+    if (e.code === 'Space') { e.preventDefault(); jump(); }
   });
   canvas.addEventListener('mousedown', jump);
   canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
 
   function update() {
-    if (!isPlaying) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw Ground
-    ctx.fillStyle = '#333';
-    ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
-    
-    // Draw Stars (Background decoration)
-    ctx.fillStyle = '#fff';
-    for(let i=0; i<10; i++) {
-        let starX = (i * 100 + frameCount * 0.5) % canvas.width;
-        ctx.fillRect(starX, 30 + (i*15)%100, 2, 2);
+    if (!isPlaying) {
+      if (player.isCrying) drawGameOverState(); // Keep rendering tears
+      return;
     }
 
-    // Player Physics
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    frames++;
+
+    // 1. Draw Background
+    ctx.fillStyle = '#0f172a'; // Night sky
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw Moon
+    ctx.fillStyle = '#fcd34d';
+    ctx.beginPath();
+    ctx.arc(canvas.width - 60, 50, 25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.arc(canvas.width - 70, 45, 22, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw Buildings
+    buildings.forEach(b => {
+      b.x -= speed * 0.3; // Parallax effect
+      if (b.x + b.width < 0) b.x = canvas.width + 10;
+      
+      ctx.fillStyle = b.color;
+      ctx.fillRect(b.x, canvas.height - 20 - b.height, b.width, b.height);
+      
+      // Draw Windows
+      b.windows.forEach((isLit, i) => {
+        if (isLit) {
+          ctx.fillStyle = (i % 3 === 0) ? '#fbbf24' : '#38bdf8'; // Yellow or Cyan
+          let wx = b.x + 10 + (i % 3) * 15;
+          let wy = (canvas.height - 20 - b.height) + 15 + Math.floor(i / 3) * 20;
+          if (wx < b.x + b.width - 10) ctx.fillRect(wx, wy, 6, 8);
+        }
+      });
+    });
+
+    // Draw Floating Hearts
+    hearts.forEach(h => {
+      h.y -= h.speed;
+      if (h.y < -20) { h.y = canvas.height + 20; h.x = Math.random() * canvas.width; }
+      ctx.fillStyle = 'rgba(244, 114, 182, 0.4)'; // Pink hearts
+      drawHeart(h.x, h.y, 6);
+    });
+
+    // Ground
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+    // Road markings
+    ctx.fillStyle = '#475569';
+    for (let i = 0; i < canvas.width + 50; i += 50) {
+      let offset = (frames * speed) % 50;
+      ctx.fillRect(i - offset, canvas.height - 10, 25, 4);
+    }
+
+    // 2. Player Physics
     player.vy += gravity;
     player.y += player.vy;
 
-    // Ground collision
     if (player.y > canvas.height - player.height - 20) {
       player.y = canvas.height - player.height - 20;
       player.vy = 0;
       player.isJumping = false;
     }
 
-    // Draw Player (Pixel Cat)
-    drawPixelCat(player.x, player.y);
+    drawPixelCat(player.x, player.y, player.isJumping, player.isCrying);
 
-    // Spawn Obstacles
-    frameCount++;
-    if (frameCount % 90 === 0) { // Spawn rate
-      let type = Math.random() > 0.5 ? 'yarn' : 'box';
+    // 3. Spawning Logic
+    // Obstacles
+    if (frames % Math.floor(90 - speed * 2) === 0) {
+      let types = ['car', 'mouse', 'cucumber', 'cat'];
+      let type = types[Math.floor(Math.random() * types.length)];
+      let obsWidth = type === 'car' ? 50 : (type === 'cucumber' ? 30 : 25);
+      let obsHeight = type === 'car' ? 30 : (type === 'cucumber' ? 12 : 20);
+      
       obstacles.push({
         x: canvas.width,
-        y: canvas.height - 40, // Ground level
-        width: 20,
-        height: 20,
+        y: canvas.height - 20 - obsHeight,
+        width: obsWidth,
+        height: obsHeight,
         type: type
       });
     }
 
-    // Update & Draw Obstacles
+    // Rewards (Treats at 10m, Wet food at 20m, then random)
+    if (distance === 10) {
+      rewards.push({ x: canvas.width, y: canvas.height - 100, type: 'treat', speed: speed });
+    } else if (distance === 20) {
+      rewards.push({ x: canvas.width, y: canvas.height - 100, type: 'wetfood', speed: speed });
+    } else if (distance > 25 && frames % 150 === 0) {
+      rewards.push({ x: canvas.width, y: canvas.height - 120, type: Math.random() > 0.5 ? 'treat' : 'wetfood', speed: speed });
+    }
+
+    // 4. Update & Draw Obstacles
     for (let i = obstacles.length - 1; i >= 0; i--) {
       let obs = obstacles[i];
       obs.x -= speed;
 
-      // Draw obstacle
-      if (obs.type === 'yarn') {
-        ctx.fillStyle = '#e74c3c'; // Red yarn
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-        ctx.fillStyle = '#c0392b';
-        ctx.fillRect(obs.x + 5, obs.y + 5, 10, 10);
-      } else {
-        ctx.fillStyle = '#8e44ad'; // Purple box
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(obs.x + 5, obs.y + 5, 10, 10); // Tape
-      }
+      drawObstacle(obs);
 
-      // Collision Detection (AABB)
-      // Shrink hitboxes slightly for fairness
-      let pX = player.x + 5;
-      let pY = player.y + 5;
-      let pW = player.width - 10;
-      let pH = player.height - 10;
-
+      // Collision (Shrunk hitbox for fairness)
       if (
-        pX < obs.x + obs.width &&
-        pX + pW > obs.x &&
-        pY < obs.y + obs.height &&
-        pY + pH > obs.y
+        player.x + 10 < obs.x + obs.width &&
+        player.x + player.width - 10 > obs.x &&
+        player.y + 10 < obs.y + obs.height &&
+        player.y + player.height > obs.y
       ) {
         gameOver();
         return;
       }
 
-      // Remove off-screen obstacles & increase score
       if (obs.x + obs.width < 0) {
         obstacles.splice(i, 1);
-        score++;
-        // Increase speed slightly every 5 points
-        if (score % 5 === 0) speed += 0.5; 
+        distance++;
+        if (distance % 5 === 0) speed += 0.3; // Get faster
       }
     }
 
-    // Draw Score (Retro font)
+    // 5. Update & Draw Rewards
+    for (let i = rewards.length - 1; i >= 0; i--) {
+      let rew = rewards[i];
+      rew.x -= speed;
+      
+      // Bobbing animation
+      rew.y = (canvas.height - 100) + Math.sin(frames * 0.1) * 20;
+
+      drawReward(rew);
+
+      // Collision with reward
+      if (
+        player.x < rew.x + 20 &&
+        player.x + player.width > rew.x &&
+        player.y < rew.y + 20 &&
+        player.y + player.height > rew.y
+      ) {
+        if (rew.type === 'treat') treatsCaught++;
+        if (rew.type === 'wetfood') wetFoodCaught++;
+        
+        // Draw "+1" effect
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px "Courier New"';
+        ctx.fillText("+1", rew.x, rew.y - 10);
+        
+        rewards.splice(i, 1);
+      } else if (rew.x < -20) {
+        rewards.splice(i, 1);
+      }
+    }
+
+    // 6. Draw UI (Score & Items)
     ctx.fillStyle = '#fff';
-    ctx.font = '20px "Courier New", monospace';
-    ctx.fillText(`DISTANCE: ${score}m`, canvas.width - 200, 30);
+    ctx.font = '18px "Courier New", monospace';
+    ctx.fillText(`DISTANCE: ${distance}m`, canvas.width - 180, 30);
+    
+    // Icons for collected items
+    ctx.fillText(`🍪 x ${treatsCaught}`, 20, 30);
+    ctx.fillText(`🥫 x ${wetFoodCaught}`, 130, 30);
 
     gameLoop = requestAnimationFrame(update);
   }
 
-  // Custom drawing function for a tiny pixel cat
-  function drawPixelCat(x, y) {
-    ctx.fillStyle = player.color;
-    // Body
-    ctx.fillRect(x + 5, y + 10, 20, 20);
-    // Head
-    ctx.fillRect(x, y, 30, 15);
-    // Ears
-    ctx.fillRect(x, y - 5, 5, 5);
-    ctx.fillRect(x + 25, y - 5, 5, 5);
-    // Tail
-    ctx.fillRect(x - 5, y + 15, 10, 5);
-    // Eyes (White)
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x + 5, y + 5, 4, 4);
-    ctx.fillRect(x + 20, y + 5, 4, 4);
-    // Pupils (Black)
-    ctx.fillStyle = '#000';
-    ctx.fillRect(x + 6, y + 6, 2, 2);
-    ctx.fillRect(x + 21, y + 6, 2, 2);
-  }
-
   function gameOver() {
     isPlaying = false;
-    overlay.style.display = 'flex';
-    overlay.innerHTML = `
-      <h3 style="color:#e74c3c;">Game Over!</h3>
-      <p style="font-size: 1.2rem; margin: 10px 0;">You ran ${score} meters!</p>
-      <p style="margin-bottom: 20px; max-width: 80%; margin-left: auto; margin-right: auto;">
-        ${score > 20 ? "Incredible! Hammicha has endless energy. You two are a perfect match!" : "Good try! Hammicha is a fast little runner. Want to try again?"}
-      </p>
-      <button class="game-btn" onclick="startGame()">Try Again</button>
-    `;
+    player.isCrying = true;
+    
+    // Stop obstacles
+    obstacles = [];
+    rewards = [];
+    
+    // Let the requestAnimationFrame draw the final state with tears
+    requestAnimationFrame(drawGameOverState);
+    
+    setTimeout(() => {
+      overlay.style.display = 'flex';
+      overlay.innerHTML = `
+        <h3 style="color:#f472b6;">Meow... I tripped!</h3>
+        <p style="font-size: 1.2rem; margin: 10px 0;">You ran ${distance} meters.</p>
+        <p style="margin-bottom: 20px; max-width: 90%; margin-left: auto; margin-right: auto; line-height:1.4;">
+          Hammicha is crying! 😿<br>
+          She caught <strong>${treatsCaught}</strong> treats and <strong>${wetFoodCaught}</strong> wet foods.<br><br>
+          ${distance > 20 ? "Amazing run! Hammicha loves playing with you. Maybe you should adopt her?" : "Can you help her run further next time?"}
+        </p>
+        <button class="game-btn" onclick="startGame()">Try Again</button>
+      `;
+    }, 1000); // 1 second delay so user sees her cry
+  }
+
+  // --- DRAWING HELPERS ---
+  function drawGameOverState() {
+    // Redraw background elements so it doesn't clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw ground
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+    
+    // Draw crying cat
+    drawPixelCat(player.x, player.y, false, true);
+    
+    // Animate tears falling
+    if (player.isCrying) {
+      ctx.fillStyle = '#38bdf8';
+      let tearY = player.y + 20 + (Date.now() / 100) % 30;
+      ctx.fillRect(player.x + 10, tearY, 3, 6);
+      ctx.fillRect(player.x + 25, tearY, 3, 6);
+      requestAnimationFrame(drawGameOverState);
+    }
+  }
+
+  function drawPixelCat(x, y, isJumping, isCrying) {
+    // Orange Body
+    ctx.fillStyle = '#d97736';
+    ctx.fillRect(x + 6, y + 12, 24, 24);
+    // Head
+    ctx.fillRect(x, y, 36, 18);
+    // Ears
+    ctx.fillRect(x, y - 6, 6, 6);
+    ctx.fillRect(x + 30, y - 6, 6, 6);
+    // Tail (wags if jumping)
+    ctx.fillRect(x - 6, y + (isJumping ? 8 : 16), 12, 6);
+    
+    // White patches
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x + 15, y, 6, 18); // nose stripe
+    ctx.fillRect(x + 6, y + 26, 24, 10); // belly
+    
+    // Eyes
+    if (isCrying) {
+      // Closed crying eyes ^ ^
+      ctx.fillStyle = '#000';
+      ctx.fillRect(x + 6, y + 8, 6, 2);
+      ctx.fillRect(x + 24, y + 8, 6, 2);
+      // Mouth (sad)
+      ctx.fillRect(x + 15, y + 14, 6, 2);
+      ctx.fillRect(x + 13, y + 12, 2, 2);
+      ctx.fillRect(x + 21, y + 12, 2, 2);
+    } else {
+      // Wide open eyes
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x + 6, y + 4, 8, 8);
+      ctx.fillRect(x + 22, y + 4, 8, 8);
+      // Pupils
+      ctx.fillStyle = '#000';
+      ctx.fillRect(x + 8, y + 6, 4, 6);
+      ctx.fillRect(x + 24, y + 6, 4, 6);
+      // Nose
+      ctx.fillStyle = '#f472b6';
+      ctx.fillRect(x + 16, y + 12, 4, 2);
+    }
+  }
+
+  function drawObstacle(obs) {
+    ctx.fillStyle = '#000';
+    
+    if (obs.type === 'car') {
+      // Car Body
+      ctx.fillStyle = '#ef4444'; // Red car
+      ctx.fillRect(obs.x, obs.y + 10, obs.width, 20);
+      // Roof
+      ctx.fillStyle = '#b91c1c';
+      ctx.fillRect(obs.x + 10, obs.y, obs.width - 20, 10);
+      // Wheels
+      ctx.fillStyle = '#111';
+      ctx.fillRect(obs.x + 5, obs.y + 25, 10, 10);
+      ctx.fillRect(obs.x + obs.width - 15, obs.y + 25, 10, 10);
+      // Headlights
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(obs.x + 2, obs.y + 15, 4, 4);
+    } 
+    else if (obs.type === 'mouse') {
+      // Gray mouse
+      ctx.fillStyle = '#9ca3af';
+      ctx.fillRect(obs.x, obs.y + 8, obs.width, 12);
+      // Ears
+      ctx.fillRect(obs.x + 4, obs.y, 8, 8);
+      // Tail
+      ctx.fillStyle = '#f472b6';
+      ctx.fillRect(obs.x - 6, obs.y + 15, 6, 2);
+      // Eye
+      ctx.fillStyle = '#000';
+      ctx.fillRect(obs.x + obs.width - 6, obs.y + 10, 2, 2);
+    } 
+    else if (obs.type === 'cucumber') {
+      // Green Cucumber
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+      // Stripes
+      ctx.fillStyle = '#166534';
+      ctx.fillRect(obs.x + 5, obs.y, 4, obs.height);
+      ctx.fillRect(obs.x + 15, obs.y, 4, obs.height);
+      ctx.fillRect(obs.x + 25, obs.y, 4, obs.height);
+    } 
+    else if (obs.type === 'cat') {
+      // Rival Black Cat
+      ctx.fillStyle = '#1f2937';
+      ctx.fillRect(obs.x + 5, obs.y + 5, 15, 15);
+      ctx.fillRect(obs.x, obs.y, 25, 12);
+      // Ears
+      ctx.fillRect(obs.x, obs.y - 4, 4, 4);
+      ctx.fillRect(obs.x + 21, obs.y - 4, 4, 4);
+      // Eyes
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(obs.x + 4, obs.y + 4, 4, 4);
+      ctx.fillRect(obs.x + 17, obs.y + 4, 4, 4);
+    }
+  }
+
+  function drawReward(rew) {
+    if (rew.type === 'treat') {
+      // Golden Treat
+      ctx.fillStyle = '#eab308';
+      ctx.fillRect(rew.x, rew.y, 20, 15);
+      ctx.fillStyle = '#854d0e';
+      ctx.fillRect(rew.x + 5, rew.y + 3, 10, 9);
+      // Star sparkle
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(rew.x + 18, rew.y - 4, 2, 6);
+      ctx.fillRect(rew.x + 16, rew.y - 2, 6, 2);
+    } else {
+      // Wet Food Can
+      ctx.fillStyle = '#ef4444'; // Red can
+      ctx.fillRect(rew.x, rew.y, 22, 18);
+      ctx.fillStyle = '#cbd5e1'; // Silver lid
+      ctx.fillRect(rew.x - 1, rew.y - 2, 24, 4);
+      // Label
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(rew.x + 4, rew.y + 5, 14, 8);
+      ctx.fillStyle = '#f472b6'; // pink label detail
+      ctx.fillRect(rew.x + 6, rew.y + 7, 10, 4);
+    }
+  }
+
+  function drawHeart(x, y, size) {
+    ctx.beginPath();
+    ctx.moveTo(x, y + size / 4);
+    ctx.quadraticCurveTo(x, y, x + size / 4, y);
+    ctx.quadraticCurveTo(x + size / 2, y, x + size / 2, y + size / 4);
+    ctx.quadraticCurveTo(x + size / 2, y, x + size * 0.75, y);
+    ctx.quadraticCurveTo(x + size, y, x + size, y + size / 4);
+    ctx.quadraticCurveTo(x + size, y + size / 2, x + size * 0.75, y + size * 0.75);
+    ctx.lineTo(x + size / 2, y + size);
+    ctx.lineTo(x + size * 0.25, y + size * 0.75);
+    ctx.quadraticCurveTo(x, y + size / 2, x, y + size / 4);
+    ctx.fill();
   }
 </script>
 </body>
