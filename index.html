@@ -403,8 +403,11 @@
   let isWinning = false;
   let distance = 0;
   let speed = 4;
-  let gravity = 0.7;
-  let jumpForce = -12;
+  
+  // Adjusted physics for a higher, longer jump
+  let gravity = 0.6; 
+  let jumpForce = -14; 
+  
   let frames = 0;
 
   // Invincibility & Respawn Logic
@@ -427,19 +430,9 @@
   let rewards = [];
   let winHearts = [];
   let house = { x: -200, y: 0, width: 150, height: 150 };
-  let landmarks = {};
 
   let treatsCaught = 0;
   let wetFoodCaught = 0;
-
-  function initBackground() {
-    landmarks = {
-      theatreX: canvas.width * 0.5,
-      hotelX: canvas.width * 0.8,
-      flagX: canvas.width * 0.2,
-      bgX: 0
-    };
-  }
 
   function startGame() {
     overlay.style.display = 'none';
@@ -464,8 +457,6 @@
     player.isCrying = false;
     player.isKissing = false;
     player.x = 60;
-    
-    initBackground();
     
     if (gameLoop) cancelAnimationFrame(gameLoop);
     gameLoop = requestAnimationFrame(update);
@@ -494,35 +485,24 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     frames++;
 
-    // 1. Sky Gradient (Calm Sunset)
+    // 1. Static Sky Gradient (No Dizziness)
     let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#fda4af'); // Soft pink
-    gradient.addColorStop(0.6, '#fcd34d'); // Soft yellow/orange
-    gradient.addColorStop(1, '#a78bfa'); // Soft purple
+    gradient.addColorStop(0, '#fda4af'); 
+    gradient.addColorStop(0.6, '#fcd34d'); 
+    gradient.addColorStop(1, '#a78bfa'); 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. Scroll Background VERY gently to avoid dizziness
-    if (!isWinning) {
-      landmarks.theatreX -= speed * 0.1;
-      landmarks.hotelX -= speed * 0.15;
-      landmarks.flagX -= speed * 0.05;
-    }
+    // 2. Static Amman Landmarks (No Parallax)
+    // Positions are fixed on the screen so nothing scrolls except obstacles
+    drawRomanTheatre(canvas.width * 0.5, canvas.height - 60);
+    drawRoyalHotel(canvas.width * 0.8, canvas.height - 120);
+    drawJordanianFlag(canvas.width * 0.2, canvas.height - 90, frames);
 
-    // Loop backgrounds
-    if (landmarks.theatreX < -200) landmarks.theatreX = canvas.width + 100;
-    if (landmarks.hotelX < -100) landmarks.hotelX = canvas.width + 200;
-    if (landmarks.flagX < -100) landmarks.flagX = canvas.width + 50;
-
-    // Draw Amman Landmarks
-    drawRomanTheatre(landmarks.theatreX, canvas.height - 60);
-    drawRoyalHotel(landmarks.hotelX, canvas.height - 120);
-    drawJordanianFlag(landmarks.flagX, canvas.height - 90, frames);
-
-    // 3. Ground (No moving lines!)
-    ctx.fillStyle = '#334155'; // Soft dark grey asphalt
+    // 3. Static Ground
+    ctx.fillStyle = '#334155'; 
     ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
-    ctx.fillStyle = '#1e293b'; // Darker bottom border
+    ctx.fillStyle = '#1e293b'; 
     ctx.fillRect(0, canvas.height - 5, canvas.width, 5);
 
     // 4. Player Physics & Invincibility
@@ -581,7 +561,9 @@
       if (frames % Math.floor(100 - speed * 3) === 0) {
         let types = ['bus', 'mouse', 'cucumber', 'cat'];
         let type = types[Math.floor(Math.random() * types.length)];
-        let obsWidth = type === 'bus' ? 60 : (type === 'cucumber' ? 35 : 25);
+        
+        // Reduced bus width for fairness
+        let obsWidth = type === 'bus' ? 45 : (type === 'cucumber' ? 35 : 25);
         let obsHeight = type === 'bus' ? 35 : (type === 'cucumber' ? 12 : 22);
         
         obstacles.push({
@@ -605,10 +587,11 @@
         obs.x -= speed;
         drawObstacle(obs);
 
+        // Slightly shrunken hitbox for fairness
         if (
-          player.x + 10 < obs.x + obs.width &&
-          player.x + player.width - 10 > obs.x &&
-          player.y + 10 < obs.y + obs.height &&
+          player.x + 15 < obs.x + obs.width &&
+          player.x + player.width - 15 > obs.x &&
+          player.y + 15 < obs.y + obs.height &&
           player.y + player.height > obs.y
         ) {
           if (isInvincible) {
@@ -776,9 +759,9 @@
   // --- AMMAN LANDMARKS ---
   function drawRomanTheatre(x, y) {
     // Base structure
-    ctx.fillStyle = '#94a3b8'; // Grey stone
+    ctx.fillStyle = '#94a3b8'; 
     ctx.fillRect(x, y, 120, 60);
-    ctx.fillStyle = '#64748b'; // Shadows
+    ctx.fillStyle = '#64748b'; 
     // Arches
     for (let i = 0; i < 3; i++) {
       ctx.fillRect(x + 10 + (i * 35), y + 10, 20, 20);
@@ -813,52 +796,55 @@
     }
   }
 
+  // FIXED: Draw Jordanian Flag with Star
   function drawJordanianFlag(x, y, time) {
     // Pole
     ctx.fillStyle = '#94a3b8';
     ctx.fillRect(x, y, 4, 90);
     
-    // Waving Flag (using sine wave)
+    // Waving Flag
     ctx.save();
+    
+    // Black Stripe
     ctx.beginPath();
     ctx.moveTo(x + 4, y);
     for (let i = 0; i <= 60; i++) {
-      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 3;
       ctx.lineTo(x + 4 + i, y + wave);
     }
     for (let i = 60; i >= 0; i--) {
-      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
-      ctx.lineTo(x + 4 + i, y + 40 + wave);
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 3;
+      ctx.lineTo(x + 4 + i, y + 13 + wave);
     }
-    ctx.fillStyle = '#000'; // Black stripe
+    ctx.fillStyle = '#000'; 
     ctx.fill();
     
-    // White stripe
+    // White Stripe
     ctx.beginPath();
     ctx.moveTo(x + 4, y + 13);
     for (let i = 0; i <= 60; i++) {
-      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 3;
       ctx.lineTo(x + 4 + i, y + 13 + wave);
     }
     for (let i = 60; i >= 0; i--) {
-      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 3;
       ctx.lineTo(x + 4 + i, y + 27 + wave);
     }
     ctx.fillStyle = '#fff';
     ctx.fill();
 
-    // Green stripe
+    // Green Stripe
     ctx.beginPath();
     ctx.moveTo(x + 4, y + 27);
     for (let i = 0; i <= 60; i++) {
-      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 3;
       ctx.lineTo(x + 4 + i, y + 27 + wave);
     }
     for (let i = 60; i >= 0; i--) {
-      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 4;
+      let wave = Math.sin((i * 0.1) + (time * 0.05)) * 3;
       ctx.lineTo(x + 4 + i, y + 40 + wave);
     }
-    ctx.fillStyle = '#10b981'; // Green
+    ctx.fillStyle = '#10b981'; 
     ctx.fill();
 
     // Red Triangle
@@ -867,6 +853,24 @@
     ctx.lineTo(x + 30, y + 20);
     ctx.lineTo(x + 4, y + 40);
     ctx.fillStyle = '#ef4444';
+    ctx.fill();
+    
+    // White 7-Pointed Star
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    let cx = x + 12;
+    let cy = y + 20;
+    let outerR = 5;
+    let innerR = 2;
+    for (let i = 0; i < 14; i++) {
+      let r = i % 2 === 0 ? outerR : innerR;
+      let angle = (i * Math.PI) / 7 - Math.PI / 2;
+      let px = cx + Math.cos(angle) * r;
+      let py = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
     ctx.fill();
     
     ctx.restore();
@@ -891,21 +895,20 @@
   function drawObstacle(obs) {
     ctx.fillStyle = '#000';
     if (obs.type === 'bus') {
-      // Amman BRT Bus (Yellow/Red)
-      ctx.fillStyle = '#fbbf24'; // Yellow body
+      // Amman BRT Bus
+      ctx.fillStyle = '#fbbf24'; 
       ctx.fillRect(obs.x, obs.y + 5, obs.width, 25);
-      ctx.fillStyle = '#ef4444'; // Red stripe
+      ctx.fillStyle = '#ef4444'; 
       ctx.fillRect(obs.x, obs.y + 15, obs.width, 8);
       // Windows
       ctx.fillStyle = '#1e293b';
-      ctx.fillRect(obs.x + 5, obs.y + 8, 10, 6);
-      ctx.fillRect(obs.x + 20, obs.y + 8, 10, 6);
-      ctx.fillRect(obs.x + 35, obs.y + 8, 10, 6);
-      ctx.fillRect(obs.x + 50, obs.y + 8, 5, 6);
+      ctx.fillRect(obs.x + 5, obs.y + 8, 8, 6);
+      ctx.fillRect(obs.x + 16, obs.y + 8, 8, 6);
+      ctx.fillRect(obs.x + 27, obs.y + 8, 8, 6);
       // Wheels
       ctx.fillStyle = '#111';
-      ctx.fillRect(obs.x + 10, obs.y + 30, 10, 8);
-      ctx.fillRect(obs.x + obs.width - 20, obs.y + 30, 10, 8);
+      ctx.fillRect(obs.x + 8, obs.y + 30, 8, 8);
+      ctx.fillRect(obs.x + obs.width - 16, obs.y + 30, 8, 8);
     } 
     else if (obs.type === 'mouse') {
       ctx.fillStyle = '#f8fafc'; 
