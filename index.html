@@ -47,47 +47,43 @@
   .fact strong{display:block;font-size:1.1rem;color:var(--accent);}
   .fact span{font-size:.85rem;color:var(--muted);}
   
-  /* --- GAME STYLES --- */
-  .game-container {
-    background: var(--ink);
+  /* --- NEW ATARI GAME STYLES --- */
+  .game-wrapper {
+    background: #1a1a1a;
     border-radius: 18px;
-    padding: 20px;
-    text-align: center;
-    color: white;
-    position: relative;
     overflow: hidden;
-    height: 300px;
+    position: relative;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    border: 4px solid #333;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 250px;
+    image-rendering: pixelated; /* Gives it that retro Atari look */
+  }
+  .game-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background: rgba(26, 26, 26, 0.85);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    transition: opacity 0.3s;
   }
-  .game-container h3 { font-size: 1.5rem; margin-bottom: 10px; }
-  .game-container p { opacity: 0.8; margin-bottom: 20px; font-size: 0.95rem; }
+  .game-overlay h3 { font-family: 'Courier New', monospace; font-size: 1.5rem; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;}
+  .game-overlay p { font-family: 'Courier New', monospace; font-size: 1rem; margin-bottom: 20px; color: #ccc;}
   .game-btn {
-    background: var(--accent); color: white; border: none;
-    padding: 12px 30px; border-radius: 999px;
-    font-weight: bold; font-size: 1.1rem; cursor: pointer;
-    transition: transform 0.2s;
+    background: var(--accent); color: white; border: 2px solid #fff;
+    padding: 10px 24px; font-family: 'Courier New', monospace;
+    font-weight: bold; font-size: 1rem; cursor: pointer;
+    text-transform: uppercase; transition: transform 0.1s;
   }
-  .game-btn:hover { transform: scale(1.05); }
-  .play-area {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: none; cursor: crosshair;
-  }
-  .mouse {
-    position: absolute; font-size: 2.5rem; cursor: pointer;
-    user-select: none; transition: transform 0.1s;
-  }
-  .mouse:active { transform: scale(0.8); }
-  .score-board {
-    position: absolute; top: 15px; right: 20px;
-    font-size: 1.2rem; font-weight: bold; color: var(--accent);
-  }
-  .timer-board {
-    position: absolute; top: 15px; left: 20px;
-    font-size: 1.2rem; font-weight: bold; color: #fff;
-  }
+  .game-btn:active { transform: scale(0.95); }
 
   .gallery{display:grid;gap:12px;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));grid-auto-rows: 280px; }
   .gallery img {width:100%;height:100%;object-fit:cover;border-radius:14px;display:block;background-color: var(--soft); transition:transform .2s;cursor: zoom-in;}
@@ -195,17 +191,17 @@
       </p>
     </section>
 
-    <!-- NEW: MINI GAME SECTION -->
+    <!-- NEW: ATARI RUNNER GAME SECTION -->
     <section>
-      <h2>Play with Hammicha!</h2>
-      <div class="game-container" id="gameContainer">
-        <h3>🐭 Catch the Toy Mouse!</h3>
-        <p>Hammicha loves to hunt. Click the mice as fast as you can in 10 seconds!</p>
-        <button class="game-btn" id="startGameBtn" onclick="startGame()">Start Game</button>
-        
-        <div class="score-board" id="scoreBoard" style="display:none;">Score: 0</div>
-        <div class="timer-board" id="timerBoard" style="display:none;">Time: 10s</div>
-        <div class="play-area" id="playArea"></div>
+      <h2>Play Hammicha's Midnight Run!</h2>
+      <p style="margin-bottom: 15px; font-size: 0.95rem; color: var(--muted);">Help Hammicha jump over the obstacles! Tap the screen or press the Spacebar to jump.</p>
+      <div class="game-wrapper">
+        <canvas id="gameCanvas"></canvas>
+        <div class="game-overlay" id="gameOverlay">
+          <h3>Hammicha's Midnight Run</h3>
+          <p>Press Space or Tap to Jump</p>
+          <button class="game-btn" onclick="startGame()">Start Game</button>
+        </div>
       </div>
     </section>
 
@@ -269,10 +265,9 @@
       </a>
     </div>
 
-    <!-- NEW: SHARE SECTION -->
     <div class="share-section">
       <p>Help Hammicha find her home by sharing her profile!</p>
-      <a href="https://api.whatsapp.com/send?text=Meet%20Hammicha!%20A%20playful%20cat%20looking%20for%20a%20loving%20home%20in%20Amman.%20Check%20out%20her%20profile%20here:%20https://ahmadalsaadi995.github.io/hammicha-adoption/" target="_blank" class="share-btn">
+      <a href="https://api.whatsapp.com/send?text=Meet%20Hammicha!%20A%20playful%20cat%20looking%20for%20a%20loving%20home%20in%20Amman.%20Check%20out%20her%20profile%20and%20play%20her%20mini-game%20here:%20https://ahmadalsaadi995.github.io/hammicha-adoption/" target="_blank" class="share-btn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Share on WhatsApp
       </a>
@@ -396,118 +391,201 @@
     }
   });
 
-  // --- 3. MINI GAME LOGIC ---
-  let score = 0;
-  let timeLeft = 10;
-  let gameInterval;
-  let mouseInterval;
-  let isGameRunning = false;
+  // --- 3. ATARI RUNNER GAME LOGIC ---
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('gameOverlay');
 
-  const startBtn = document.getElementById('startGameBtn');
-  const scoreBoard = document.getElementById('scoreBoard');
-  const timerBoard = document.getElementById('timerBoard');
-  const playArea = document.getElementById('playArea');
-  const gameContainer = document.getElementById('gameContainer');
+  // Set canvas resolution
+  function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = 250; // Matches CSS height
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  let gameLoop;
+  let isPlaying = false;
+  let score = 0;
+  let speed = 5;
+  let gravity = 0.6;
+  let jumpForce = -11;
+
+  // Player (Hammicha)
+  const player = {
+    x: 50,
+    y: 0,
+    width: 30,
+    height: 30,
+    vy: 0,
+    isJumping: false,
+    color: '#d97736' // Orange
+  };
+
+  let obstacles = [];
+  let frameCount = 0;
 
   function startGame() {
-    if (isGameRunning) return;
-    isGameRunning = true;
+    overlay.style.display = 'none';
+    isPlaying = true;
     score = 0;
-    timeLeft = 10;
+    speed = 5;
+    obstacles = [];
+    frameCount = 0;
+    player.y = canvas.height - player.height - 20; // Ground level
+    player.vy = 0;
+    player.isJumping = false;
     
-    startBtn.style.display = 'none';
-    scoreBoard.style.display = 'block';
-    timerBoard.style.display = 'block';
-    playArea.style.display = 'block';
-    scoreBoard.textContent = `Score: ${score}`;
-    timerBoard.textContent = `Time: ${timeLeft}s`;
-    playArea.innerHTML = ''; // Clear old mice
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    gameLoop = requestAnimationFrame(update);
+  }
 
-    // Timer
-    gameInterval = setInterval(() => {
-      timeLeft--;
-      timerBoard.textContent = `Time: ${timeLeft}s`;
-      if (timeLeft <= 0) {
-        endGame();
+  function jump() {
+    if (!isPlaying) return;
+    if (!player.isJumping) {
+      player.vy = jumpForce;
+      player.isJumping = true;
+    }
+  }
+
+  // Controls
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      e.preventDefault(); // Prevent scrolling down
+      jump();
+    }
+  });
+  canvas.addEventListener('mousedown', jump);
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+
+  function update() {
+    if (!isPlaying) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw Ground
+    ctx.fillStyle = '#333';
+    ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+    
+    // Draw Stars (Background decoration)
+    ctx.fillStyle = '#fff';
+    for(let i=0; i<10; i++) {
+        let starX = (i * 100 + frameCount * 0.5) % canvas.width;
+        ctx.fillRect(starX, 30 + (i*15)%100, 2, 2);
+    }
+
+    // Player Physics
+    player.vy += gravity;
+    player.y += player.vy;
+
+    // Ground collision
+    if (player.y > canvas.height - player.height - 20) {
+      player.y = canvas.height - player.height - 20;
+      player.vy = 0;
+      player.isJumping = false;
+    }
+
+    // Draw Player (Pixel Cat)
+    drawPixelCat(player.x, player.y);
+
+    // Spawn Obstacles
+    frameCount++;
+    if (frameCount % 90 === 0) { // Spawn rate
+      let type = Math.random() > 0.5 ? 'yarn' : 'box';
+      obstacles.push({
+        x: canvas.width,
+        y: canvas.height - 40, // Ground level
+        width: 20,
+        height: 20,
+        type: type
+      });
+    }
+
+    // Update & Draw Obstacles
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      let obs = obstacles[i];
+      obs.x -= speed;
+
+      // Draw obstacle
+      if (obs.type === 'yarn') {
+        ctx.fillStyle = '#e74c3c'; // Red yarn
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+        ctx.fillStyle = '#c0392b';
+        ctx.fillRect(obs.x + 5, obs.y + 5, 10, 10);
+      } else {
+        ctx.fillStyle = '#8e44ad'; // Purple box
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(obs.x + 5, obs.y + 5, 10, 10); // Tape
       }
-    }, 1000);
 
-    // Spawn mice
-    mouseInterval = setInterval(spawnMouse, 600);
+      // Collision Detection (AABB)
+      // Shrink hitboxes slightly for fairness
+      let pX = player.x + 5;
+      let pY = player.y + 5;
+      let pW = player.width - 10;
+      let pH = player.height - 10;
+
+      if (
+        pX < obs.x + obs.width &&
+        pX + pW > obs.x &&
+        pY < obs.y + obs.height &&
+        pY + pH > obs.y
+      ) {
+        gameOver();
+        return;
+      }
+
+      // Remove off-screen obstacles & increase score
+      if (obs.x + obs.width < 0) {
+        obstacles.splice(i, 1);
+        score++;
+        // Increase speed slightly every 5 points
+        if (score % 5 === 0) speed += 0.5; 
+      }
+    }
+
+    // Draw Score (Retro font)
+    ctx.fillStyle = '#fff';
+    ctx.font = '20px "Courier New", monospace';
+    ctx.fillText(`DISTANCE: ${score}m`, canvas.width - 200, 30);
+
+    gameLoop = requestAnimationFrame(update);
   }
 
-  function spawnMouse() {
-    // Remove existing mouse so only one is on screen
-    playArea.innerHTML = ''; 
-    
-    const mouse = document.createElement('div');
-    mouse.classList.add('mouse');
-    mouse.textContent = '🐭';
-    
-    // Random position within the play area
-    const x = Math.random() * (playArea.clientWidth - 50);
-    const y = Math.random() * (playArea.clientHeight - 50);
-    
-    mouse.style.left = `${x}px`;
-    mouse.style.top = `${y}px`;
-
-    mouse.addEventListener('mousedown', (e) => {
-      e.stopPropagation(); // Prevent closing lightbox if clicked
-      score++;
-      scoreBoard.textContent = `Score: ${score}`;
-      mouse.remove(); // Disappear on click
-    });
-
-    // For mobile touch
-    mouse.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      score++;
-      scoreBoard.textContent = `Score: ${score}`;
-      mouse.remove();
-    });
-
-    playArea.appendChild(mouse);
+  // Custom drawing function for a tiny pixel cat
+  function drawPixelCat(x, y) {
+    ctx.fillStyle = player.color;
+    // Body
+    ctx.fillRect(x + 5, y + 10, 20, 20);
+    // Head
+    ctx.fillRect(x, y, 30, 15);
+    // Ears
+    ctx.fillRect(x, y - 5, 5, 5);
+    ctx.fillRect(x + 25, y - 5, 5, 5);
+    // Tail
+    ctx.fillRect(x - 5, y + 15, 10, 5);
+    // Eyes (White)
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x + 5, y + 5, 4, 4);
+    ctx.fillRect(x + 20, y + 5, 4, 4);
+    // Pupils (Black)
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x + 6, y + 6, 2, 2);
+    ctx.fillRect(x + 21, y + 6, 2, 2);
   }
 
-  function endGame() {
-    isGameRunning = false;
-    clearInterval(gameInterval);
-    clearInterval(mouseInterval);
-    playArea.innerHTML = '';
-    
-    scoreBoard.style.display = 'none';
-    timerBoard.style.display = 'none';
-    playArea.style.display = 'none';
-    
-    startBtn.style.display = 'inline-block';
-    
-    let message = "";
-    if (score >= 10) message = "Wow! You're a natural! You and Hammicha are a purr-fect match! 🐾";
-    else if (score >= 5) message = "Good job! Hammicha would love to play with you. 🧶";
-    else message = "Hammicha is too fast for you! Want to try again? 😸";
-
-    gameContainer.innerHTML = `
-      <h3 style="color:var(--accent); margin-bottom: 10px;">Game Over!</h3>
-      <p style="font-size: 1.2rem; margin-bottom: 15px;">You caught <strong>${score}</strong> mice!</p>
-      <p style="margin-bottom: 20px; font-style: italic;">"${message}"</p>
-      <button class="game-btn" onclick="resetGame()">Play Again</button>
+  function gameOver() {
+    isPlaying = false;
+    overlay.style.display = 'flex';
+    overlay.innerHTML = `
+      <h3 style="color:#e74c3c;">Game Over!</h3>
+      <p style="font-size: 1.2rem; margin: 10px 0;">You ran ${score} meters!</p>
+      <p style="margin-bottom: 20px; max-width: 80%; margin-left: auto; margin-right: auto;">
+        ${score > 20 ? "Incredible! Hammicha has endless energy. You two are a perfect match!" : "Good try! Hammicha is a fast little runner. Want to try again?"}
+      </p>
+      <button class="game-btn" onclick="startGame()">Try Again</button>
     `;
-  }
-
-  function resetGame() {
-    gameContainer.innerHTML = `
-      <h3>🐭 Catch the Toy Mouse!</h3>
-      <p>Hammicha loves to hunt. Click the mice as fast as you can in 10 seconds!</p>
-      <button class="game-btn" id="startGameBtn" onclick="startGame()">Start Game</button>
-      <div class="score-board" id="scoreBoard" style="display:none;">Score: 0</div>
-      <div class="timer-board" id="timerBoard" style="display:none;">Time: 10s</div>
-      <div class="play-area" id="playArea"></div>
-    `;
-    // Re-assign variables because we replaced the HTML
-    startBtn = document.getElementById('startGameBtn');
-    scoreBoard = document.getElementById('scoreBoard');
-    timerBoard = document.getElementById('timerBoard');
-    playArea = document.getElementById('playArea');
   }
 </script>
 </body>
