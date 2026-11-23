@@ -17,7 +17,7 @@
     --coral:#f8dbd8; 
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  
+
   body{
     font-family:'Nunito', system-ui, -apple-system, sans-serif;
     background-color: var(--coral);
@@ -26,11 +26,11 @@
     color:var(--ink);
     line-height:1.6;
   }
-  
+
   .wrap{max-width:900px;margin:0 auto;padding:40px 20px 60px;}
   .content-box { background: rgba(253, 248, 243, 0.96); padding: 40px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); }
   @media(max-width:600px) { .wrap { padding: 10px; } .content-box { padding: 20px; } }
-  
+
   header{text-align:center;padding:20px 0 20px;}
   .badge{display:inline-block;background:var(--accent);color:#fff;padding:6px 16px;border-radius:999px;font-size:.85rem;font-weight:600;letter-spacing:.5px;margin-bottom:16px;}
   header h1{font-size:clamp(2rem,5vw,3rem);margin-bottom:10px;color:var(--accent);}
@@ -39,9 +39,9 @@
   .stats-container { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
   .stat-box { background: #fff; border: 1px solid var(--soft); padding: 6px 15px; border-radius: 20px; font-weight: 700; color: var(--muted); font-size: 0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
   .stat-box span { color: var(--accent); }
-  
+
   .hero{width:100%;max-height:550px;object-fit:cover;object-position:center 30%;border-radius:18px;display:block;box-shadow:0 8px 24px rgba(0,0,0,.12);cursor: zoom-in; margin-top: 20px;}
-  
+
   .scroll-indicator {text-align: center;color: var(--muted);font-size: 0.9rem;font-weight: 600;margin-top: 15px;margin-bottom: 30px;display: flex;flex-direction: column;align-items: center;gap: 5px;animation: bounce 2s infinite;transition: opacity 0.5s ease;}
   .scroll-indicator.hidden {opacity: 0;pointer-events: none;}
   .scroll-indicator svg {width: 24px;height: 24px;stroke: var(--accent);stroke-width: 2.5;fill: none;}
@@ -53,7 +53,7 @@
   .fact{background:var(--soft);border-radius:14px;padding:16px;text-align:center;}
   .fact strong{display:block;font-size:1.1rem;color:var(--accent);}
   .fact span{font-size:.85rem;color:var(--muted);}
-  
+
   /* --- GAME CONTROLS & SIZING --- */
   .game-controls {
     display: flex; justify-content: space-between; align-items: center;
@@ -119,20 +119,32 @@
   .play-btn {position: absolute;top: 50%; left: 50%;transform: translate(-50%, -50%);width: 64px; height: 64px;background: rgba(0, 0, 0, 0.6);border-radius: 50%;display: flex;justify-content: center;align-items: center;color: white;pointer-events: none;transition: background .2s, transform .2s;box-shadow: 0 4px 12px rgba(0,0,0,0.3);}
   .video-wrapper:hover .play-btn {background: var(--accent);transform: translate(-50%, -50%) scale(1.1);}
   .play-btn svg {width: 32px; height: 32px;margin-left: 4px;}
-  
+
   .cols{display:grid;gap:24px;grid-template-columns:1fr 1fr;}
   @media(max-width:600px){.cols{grid-template-columns:1fr;}}
   ul{list-style:none;}
   ul li{padding:8px 0 8px 28px;position:relative;}
   ul li::before{content:"✓";position:absolute;left:0;top:8px;color:var(--accent);font-weight:700;}
   ul li.no::before{content:"✗";color:#c0392b;}
-  
+
   .contact{background:var(--ink);color:#fff;border-radius:20px;padding:36px 24px;text-align:center;margin-top:50px;box-shadow: 0 10px 30px rgba(0,0,0,.15);}
   .contact h2{color:#fff;border-color:rgba(255,255,255,.2);}
   .contact p{margin-bottom:22px;opacity:.85;}
+  .adoption-form{max-width:620px;margin:24px auto 0;text-align:left}
+  .adoption-form label{display:block;margin:13px 0 6px;font-weight:700;color:#fff}
+  .adoption-form input,.adoption-form textarea{width:100%;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:12px 14px;font:inherit;color:var(--ink);background:#fff}
+  .adoption-form textarea{min-height:140px;resize:vertical}
+  .adoption-form button{margin-top:16px;border:0;cursor:pointer}
+  .form-note{font-size:.85rem;opacity:.8;margin-top:10px}
+  .form-status{margin-top:12px;min-height:1.5em;font-weight:700}
+  .honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden}
+  #overdriveBtn{position:absolute;z-index:5;right:14px;bottom:45px;display:none;border:0;border-radius:999px;padding:10px 16px;color:#fff;background:#db2777;font-weight:900;cursor:pointer;box-shadow:0 5px 18px #0006}
+  #overdriveBtn.active{display:block;animation:bounce 1s infinite}
+  .yarn-meter{position:absolute;z-index:4;right:14px;top:14px;width:110px;height:12px;border-radius:99px;background:#334155;border:1px solid #94a3b8;overflow:hidden}
+  .yarn-meter>span{display:block;width:0%;height:100%;background:#f472b6;transition:width .15s}
   .btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:14px 34px;border-radius:999px;font-weight:600;font-size:1.05rem;transition:transform .15s,opacity .15s;}
   .btn:hover{transform:translateY(-2px);opacity:.92;}
-  
+
   footer{text-align:center;color:var(--muted);font-size:.8rem;padding:30px 20px 10px; border-top: 1px solid var(--soft); margin-top: 30px;}
   footer strong { color: var(--ink); }
 
@@ -165,16 +177,15 @@
 </head>
 <body>
 
-<div class="wrap">
-  <div class="content-box">
+<div class="wrap">  <div class="content-box">
     <header>
       <div class="badge">ADOPT ME</div>
       <h1>Meet Hammicha</h1>
       <p>A playful, independent 2-year-old looking for her forever home in Amman.</p>
-      
+
       <div class="stats-container">
-        <div class="stat-box">👀 <span id="visit-count">...</span> Visitors</div>
-        <div class="stat-box">🎮 <span id="play-count">...</span> Players</div>
+        <div class="stat-box">👀 <span id="visit-count">...</span> Visits</div>
+        <div class="stat-box">🎮 <span id="play-count">...</span> Player sessions</div>
       </div>
     </header>
 
@@ -223,13 +234,13 @@
         Collect yarn to go Super-Cat! You automatically get a respawn heart every 10 meters.<br>
         <strong>Tap / Space to Jump. Double tap for a Flip!</strong>
       </p>
-      
+
       <div class="game-controls">
         <div class="size-btns">
           <span style="font-weight:700; color:#475569; margin-right:5px; font-size:0.9rem;">Size:</span>
-          <button class="control-btn" onclick="setSize('small')">S</button>
-          <button class="control-btn active" id="btn-medium" onclick="setSize('medium')">M</button>
-          <button class="control-btn" onclick="setSize('large')">L</button>
+          <button class="control-btn" onclick="setSize('small', this)">S</button>
+          <button class="control-btn active" id="btn-medium" onclick="setSize('medium', this)">M</button>
+          <button class="control-btn" onclick="setSize('large', this)">L</button>
         </div>
         <div class="action-btns">
           <button class="control-btn" onclick="toggleFullScreen()">⛶ Fullscreen</button>
@@ -239,12 +250,13 @@
 
       <div class="game-wrapper game-medium" id="gameWrapper">
         <canvas id="gameCanvas"></canvas>
-        
+        <div class="yarn-meter" aria-label="Yarn power"><span id="yarnFill"></span></div>
+
         <!-- Overdrive Button -->
         <button id="overdriveBtn" onclick="activateOverdrive()">GO SUPER!</button>
-        
+
         <div id="checkpointMsg">Checkpoint Saved! ❤️</div>
-        
+
         <div class="game-overlay" id="gameOverlay">
           <h3>Hammicha's Amman Dash</h3>
           <p>Press Space or Tap to Start</p>
@@ -259,14 +271,14 @@
         <img class="lightbox-trigger" src="2.jpg" alt="Hammicha relaxing outside on the grass">
         <img class="lightbox-trigger" src="3.jpg" alt="Hammicha being adventurous and climbing high">
         <img class="lightbox-trigger" src="4.jpg" alt="Hammicha sleeping curled up with her blue toy">
-        
+
         <div class="video-wrapper lightbox-trigger" data-video="5.mp4">
           <video src="5.mp4" muted loop playsinline></video>
           <div class="play-btn">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           </div>
         </div>
-        
+
         <div class="video-wrapper lightbox-trigger" data-video="6.mp4">
           <video src="6.mp4" muted loop playsinline></video>
           <div class="play-btn">
@@ -304,19 +316,28 @@
 
     <div class="contact">
       <h2>Interested in Adopting Hammicha?</h2>
-      <p>
-        Location: Amman, Jordan<br>
-        <strong>Adoption Fee: None (Free to a good home)</strong>
-      </p>
-      <a class="btn" href="mailto:ahmadm.alsadi@icloud.com?subject=Adopting%20Hammicha">
-        Email Me About Hammicha
-      </a>
+      <p>Location: Amman, Jordan<br><strong>Adoption Fee: None (Free to a good home)</strong></p>
+      <form class="adoption-form" id="adoptionForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <div class="honeypot" aria-hidden="true"><label>Leave this field empty<input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
+        <label for="adopter-name">Your name *</label>
+        <input id="adopter-name" name="name" type="text" maxlength="100" autocomplete="name" required>
+        <label for="adopter-email">Your email address *</label>
+        <input id="adopter-email" name="email" type="email" maxlength="200" autocomplete="email" required>
+        <label for="adopter-phone">Phone number (optional)</label>
+        <input id="adopter-phone" name="phone" type="tel" maxlength="40" autocomplete="tel">
+        <label for="adoption-letter">Your letter to Hammicha *</label>
+        <textarea id="adoption-letter" name="message" maxlength="5000" required placeholder="Tell me a little about yourself, your home, and why you'd love to adopt Hammicha..."></textarea>
+        <input type="hidden" name="_subject" value="New adoption inquiry for Hammicha">
+        <button class="btn" type="submit" id="adoptionSubmit">Send Adoption Letter</button>
+        <p class="form-note">Your message will be sent privately. My email address is not displayed on this website.</p>
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
     </div>
 
     <div class="share-section">
       <p>Help Hammicha find her home by sharing her profile!</p>
       <a href="https://api.whatsapp.com/send?text=Meet%20Hammicha!%20A%20playful%20cat%20looking%20for%20a%20loving%20home%20in%20Amman.%20Check%20out%20her%20profile%20and%20play%20her%20mini-game%20here:%20https://ahmadalsaadi995.github.io/hammicha-adoption/" target="_blank" class="share-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479-1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Share on WhatsApp
       </a>
     </div>
@@ -342,38 +363,82 @@
   // --- IP PROTECTION WARNING ---
   console.log("%c© 2024 Ahmad Al-Sadi. All Rights Reserved.", "color: #ef4444; font-size: 24px; font-weight: bold;");
   console.log("%cThe code, design, and game ('Amman Dash') on this website are the intellectual property of Ahmad Al-Sadi.", "color: #f97316; font-size: 14px;");
-  
-  // --- LIVE STATS ---
+
+  // --- SHARED LIVE STATS ---
+  // Visits count browser sessions; Players count sessions that start the game.
   const namespace = 'ahmadalsaadi995';
+  const visitKey = 'hammicha_visit_counted';
+  const playerKey = 'hammicha_player_counted';
+
+  async function updateCounter(counter, increment = false) {
+    const endpoint = `https://api.counterapi.dev/v1/${namespace}/${counter}${increment ? '/up' : ''}`;
+    const response = await fetch(endpoint, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Counter request failed: ${response.status}`);
+    const data = await response.json();
+    if (!Number.isFinite(Number(data.count))) throw new Error('Invalid counter response');
+    return Number(data.count);
+  }
+
   async function loadStats() {
+    const visitEl = document.getElementById('visit-count');
+    const playEl = document.getElementById('play-count');
     try {
-      if (!sessionStorage.getItem('hammicha_visited')) {
-        const visitRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/hammicha-visits/up`);
-        const visitData = await visitRes.json();
-        document.getElementById('visit-count').innerText = visitData.count.toLocaleString();
-        sessionStorage.setItem('hammicha_visited', 'true');
-      } else {
-        const visitRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/hammicha-visits`);
-        const visitData = await visitRes.json();
-        document.getElementById('visit-count').innerText = visitData.count.toLocaleString();
-      }
-      const playRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/hammicha-plays`);
-      const playData = await playRes.json();
-      document.getElementById('play-count').innerText = playData.count.toLocaleString();
+      const firstVisit = !sessionStorage.getItem(visitKey);
+      const visits = await updateCounter('hammicha-visits', firstVisit);
+      if (firstVisit) sessionStorage.setItem(visitKey, 'true');
+      visitEl.textContent = visits.toLocaleString();
     } catch (error) {
-      document.getElementById('visit-count').innerText = "1,234";
-      document.getElementById('play-count').innerText = "567";
+      visitEl.textContent = 'Unavailable';
+      console.warn('Visitor statistics unavailable:', error);
+    }
+    try {
+      const players = await updateCounter('hammicha-players');
+      playEl.textContent = players.toLocaleString();
+    } catch (error) {
+      playEl.textContent = 'Unavailable';
+      console.warn('Player statistics unavailable:', error);
     }
   }
   loadStats();
 
   async function incrementPlayCount() {
+    if (sessionStorage.getItem(playerKey)) return;
     try {
-      const playRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/hammicha-plays/up`);
-      const playData = await playRes.json();
-      document.getElementById('play-count').innerText = playData.count.toLocaleString();
-    } catch (error) {}
+      const count = await updateCounter('hammicha-players', true);
+      sessionStorage.setItem(playerKey, 'true');
+      document.getElementById('play-count').textContent = count.toLocaleString();
+    } catch (error) {
+      console.warn('Could not update player statistics:', error);
+    }
   }
+
+  // --- PRIVATE ADOPTION LETTER ---
+  const adoptionForm = document.getElementById('adoptionForm');
+  adoptionForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const status = document.getElementById('formStatus');
+    const submit = document.getElementById('adoptionSubmit');
+    if (adoptionForm.querySelector('[name="_gotcha"]').value) return;
+    if (!adoptionForm.reportValidity()) return;
+    submit.disabled = true;
+    submit.textContent = 'Sending...';
+    status.textContent = '';
+    try {
+      const response = await fetch(adoptionForm.action, {
+        method: 'POST', body: new FormData(adoptionForm),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!response.ok) throw new Error(`Form service returned ${response.status}`);
+      adoptionForm.reset();
+      status.textContent = 'Thank you! Your letter has been sent successfully.';
+    } catch (error) {
+      status.textContent = 'Sorry, your letter could not be sent. Please try again later.';
+      console.error('Adoption form submission failed:', error);
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Send Adoption Letter';
+    }
+  });
 
   // --- LIGHTBOX LOGIC ---
   const mediaElements = document.querySelectorAll('.lightbox-trigger');
@@ -468,11 +533,12 @@
   const checkpointMsg = document.getElementById('checkpointMsg');
   const overdriveBtn = document.getElementById('overdriveBtn');
 
-  function setSize(size) {
+  function setSize(size, button) {
+    if (!['small', 'medium', 'large'].includes(size)) return;
     wrapper.className = 'game-wrapper game-' + size;
     document.querySelectorAll('.size-btns .control-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    setTimeout(resizeCanvas, 300); 
+    if (button) button.classList.add('active');
+    requestAnimationFrame(resizeCanvas);
   }
 
   function toggleFullScreen() {
@@ -486,13 +552,23 @@
   document.addEventListener('fullscreenchange', () => setTimeout(resizeCanvas, 100));
 
   function resizeCanvas() {
-    canvas.width = wrapper.clientWidth;
-    canvas.height = wrapper.clientHeight; 
+    const rect = wrapper.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    canvas.width = Math.round(rect.width);
+    canvas.height = Math.round(rect.height);
   }
   window.addEventListener('resize', resizeCanvas);
+  if ('ResizeObserver' in window) new ResizeObserver(resizeCanvas).observe(wrapper);
   resizeCanvas();
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isPlaying && !isPaused) {
+      isPaused = true;
+      pauseBtn.innerHTML = '▶ Resume';
+    }
+  });
 
-  let gameLoop, isPlaying = false, isPaused = false, isWinning = false, isFloating = false;
+  let gameLoop = 0, winTimer = 0, gameOverTimer = 0;
+  let isPlaying = false, isPaused = false, isWinning = false, isFloating = false;
   let distance = 0, speed = 5, gravity = 0.7, jumpForce = -14, frames = 0;
   let particles = [], obstacles = [], rewards = [], winHearts = [];
   let hasHeart = false, isInvincible = false, invincibleTimer = 0, spawnedMilestones = []; 
@@ -506,35 +582,40 @@
     isJumping: false, jumpsLeft: 2, isFlipping: false, rotation: 0,
     isCrying: false, isKissing: false, squash: 1, stretch: 1
   };
+  player.y = canvas.height - player.height - 30;
 
   function togglePause() {
     if (!isPlaying) return;
     isPaused = !isPaused;
     pauseBtn.innerHTML = isPaused ? '▶ Resume' : '⏸ Pause';
-    if (!isPaused) gameLoop = requestAnimationFrame(update);
+    if (!isPaused && !gameLoop) gameLoop = requestAnimationFrame(update);
   }
 
   function startGame() {
+    if (winTimer) clearTimeout(winTimer);
+    if (gameOverTimer) clearTimeout(gameOverTimer);
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    gameLoop = 0;
     incrementPlayCount();
     overlay.style.display = 'none';
     pauseBtn.style.display = 'block';
     pauseBtn.innerHTML = '⏸ Pause';
     overdriveBtn.classList.remove('active');
-    
+
     isPlaying = true; isPaused = false; isWinning = false; isFloating = false;
     distance = 0; speed = 5;
     obstacles = []; rewards = []; winHearts = []; particles = []; spawnedMilestones = []; 
     treatsCaught = 0; wetFoodCaught = 0; frames = 0; yarnCount = 0; isOverdrive = false;
     hasHeart = false; isInvincible = false; invincibleTimer = 0;
-    
+
     player.y = canvas.height - player.height - 30; 
     player.vy = 0; player.isJumping = false; player.jumpsLeft = 2;
     player.isFlipping = false; player.rotation = 0; player.isCrying = false;
     player.isKissing = false; player.squash = 1; player.stretch = 1;
-    
-    document.getElementById('yarnFill').style.width = '0%';
-    
-    if (gameLoop) cancelAnimationFrame(gameLoop);
+
+    const yarnFill = document.getElementById('yarnFill');
+    if (yarnFill) yarnFill.style.width = '0%';
+
     gameLoop = requestAnimationFrame(update);
   }
 
@@ -561,11 +642,17 @@
     }
   }
 
-  document.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); jump(); } });
-  canvas.addEventListener('mousedown', jump);
-  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space' || /INPUT|TEXTAREA|BUTTON/.test(document.activeElement?.tagName || '')) return;
+    e.preventDefault();
+    if (!isPlaying) startGame();
+    else jump();
+  });
+  canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); jump(); });
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); }, { passive: false });
 
   function update() {
+    gameLoop = 0;
     if (!isPlaying || isPaused) return;
     if (!isPlaying && !isWinning) { if (player.isCrying) drawGameOverState(); return; }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -622,7 +709,7 @@
     // Winning Logic
     if (distance >= 50 && !isWinning) {
       isWinning = true; isFloating = true; obstacles = []; rewards = []; player.isKissing = true;
-      setTimeout(triggerWinSequence, 2500); 
+      winTimer = setTimeout(triggerWinSequence, 2500); 
     }
     if (isWinning) {
       drawMansaf(groundY);
@@ -630,18 +717,20 @@
     }
 
     // Particles & Hearts
-    particles.forEach((p, index) => {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
       p.x += p.vx; p.y += p.vy; p.life--;
-      ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 30;
+      ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life / 30);
       ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1;
-      if (p.life <= 0) particles.splice(index, 1);
-    });
-    winHearts.forEach((h, index) => {
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+    for (let i = winHearts.length - 1; i >= 0; i--) {
+      const h = winHearts[i];
       h.x += h.vx; h.y += h.vy; h.life--;
-      ctx.fillStyle = h.color; ctx.globalAlpha = h.life / 120;
+      ctx.fillStyle = h.color; ctx.globalAlpha = Math.max(0, h.life / 120);
       drawHeart(h.x, h.y, 14); ctx.globalAlpha = 1;
-      if (h.life <= 0) winHearts.splice(index, 1);
-    });
+      if (h.life <= 0) winHearts.splice(i, 1);
+    }
 
     if (!isInvincible || Math.floor(frames / 5) % 2 === 0) {
       drawModernCat(player.x, player.y, player.isJumping, player.isCrying, player.isKissing, player.rotation);
@@ -649,7 +738,8 @@
 
     // Spawning & Collisions
     if (!isWinning) {
-      if (frames % Math.floor(100 - speed * 3) === 0 && !isOverdrive) {
+      const spawnInterval = Math.max(35, Math.floor(100 - speed * 3));
+      if (frames % spawnInterval === 0 && !isOverdrive) {
         let types = ['bus', 'mouse', 'cucumber', 'cat'];
         let type = types[Math.floor(Math.random() * types.length)];
         let obsWidth = type === 'bus' ? 60 : (type === 'cucumber' ? 40 : 30);
@@ -715,10 +805,11 @@
           if (rew.type === 'wetfood') wetFoodCaught++;
           if (rew.type === 'yarn') {
             yarnCount++;
-            document.getElementById('yarnFill').style.width = (yarnCount * 10) + "%";
+            const yarnFill = document.getElementById('yarnFill');
+            if (yarnFill) yarnFill.style.width = Math.min(yarnCount * 10, 100) + "%";
             if (yarnCount >= 10) overdriveBtn.classList.add('active');
           }
-          
+
           for(let p=0; p<8; p++) particles.push({x: rew.x+10, y: rew.y+10, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: '#fbbf24'});
           rewards.splice(i, 1);
         } else if (rew.x < -30) { rewards.splice(i, 1); }
@@ -802,7 +893,7 @@
     ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.roundRect(120, 28, barWidth * progress, 14, 7); ctx.fill();
     ctx.fillStyle = '#ef4444';
     for(let i=1; i<5; i++) { let mx = 120 + (barWidth * (i*10/50)); ctx.beginPath(); ctx.arc(mx, 35, 4, 0, Math.PI*2); ctx.fill(); }
-    
+
     ctx.fillStyle = '#fff'; ctx.font = 'bold 16px "Nunito", sans-serif';
     ctx.fillText(`${distance}m`, 30, 40);
     ctx.fillText('Mansaf!', canvas.width - 90, 40);
@@ -911,7 +1002,11 @@
   }
 
   function triggerWinSequence() {
-    isPlaying = false; pauseBtn.style.display = 'none';
+    winTimer = 0;
+    isPlaying = false;
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    gameLoop = 0;
+    pauseBtn.style.display = 'none';
     overlay.style.display = 'flex';
     overlay.innerHTML = `
       <h3 style="color:#fbbf24;">Mansaf Time! 🥘</h3>
@@ -926,10 +1021,15 @@
   }
 
   function gameOver() {
-    isPlaying = false; pauseBtn.style.display = 'none'; player.isCrying = true;
+    isPlaying = false;
+    isPaused = false;
+    if (gameLoop) cancelAnimationFrame(gameLoop);
+    gameLoop = 0;
+    pauseBtn.style.display = 'none'; player.isCrying = true;
     obstacles = []; rewards = [];
     requestAnimationFrame(drawGameOverState);
-    setTimeout(() => {
+    gameOverTimer = setTimeout(() => {
+      gameOverTimer = 0;
       overlay.style.display = 'flex';
       overlay.innerHTML = `
         <h3 style="color:#ef4444;">Meow... I tripped!</h3>
@@ -955,9 +1055,8 @@
       ctx.fillStyle = '#38bdf8'; let tearY = player.y + 20 + (Date.now() / 80) % 40;
       ctx.beginPath(); ctx.arc(player.x + 15, tearY, 3, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(player.x + 29, tearY, 3, 0, Math.PI*2); ctx.fill();
-      requestAnimationFrame(drawGameOverState);
     }
   }
 </script>
 </body>
-</html>
+</html><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
