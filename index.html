@@ -534,7 +534,7 @@ window.addEventListener('resize',resizeCanvas);
 if('ResizeObserver'in window)new ResizeObserver(resizeCanvas).observe(wrapper);
 resizeCanvas();
 
-let gameLoop=0,winTimer=0,gameOverTimer=0;
+let gameLoop=0,winTimer=0,gameOverTimer=0,checkpointTimer=0;
 let isPlaying=false,isPaused=false,isWinning=false,isFloating=false;
 let distance=0,speed=5,gravity=.7,jumpForce=-14,frames=0;
 let particles=[],obstacles=[],rewards=[],winHearts=[];
@@ -545,7 +545,8 @@ let yarnCount=0,isOverdrive=false,overdriveTimer=0;
 const player={
   x:80,y:0,width:44,height:44,vy:0,
   isJumping:false,jumpsLeft:2,isFlipping:false,rotation:0,
-  isCrying:false,isKissing:false,squash:1,stretch:1
+  isCrying:false,isKissing:false,squash:1,stretch:1,
+  isGlidingDown: false // New state for safe landing after overdrive
 };
 
 function togglePause(){
@@ -558,29 +559,36 @@ function togglePause(){
 function startGame(){
   if(winTimer)clearTimeout(winTimer);
   if(gameOverTimer)clearTimeout(gameOverTimer);
+  if(checkpointTimer)clearTimeout(checkpointTimer);
   if(gameLoop)cancelAnimationFrame(gameLoop);
   gameLoop=0;
   incrementPlayCount();
+  
   overlay.style.display='none';
   pauseBtn.style.display='block';
   pauseBtn.innerHTML='⏸ Pause';
   overdriveBtn.classList.remove('active');
+  checkpointMsg.classList.remove('show');
+
   isPlaying=true;isPaused=false;isWinning=false;isFloating=false;
   distance=0;speed=5;
   obstacles=[];rewards=[];winHearts=[];particles=[];spawnedMilestones=[];
   treatsCaught=0;wetFoodCaught=0;frames=0;yarnCount=0;isOverdrive=false;
   hasHeart=false;isInvincible=false;invincibleTimer=0;
+  
   player.y=canvas.height-player.height-30;
   player.vy=0;player.isJumping=false;player.jumpsLeft=2;
   player.isFlipping=false;player.rotation=0;player.isCrying=false;
   player.isKissing=false;player.squash=1;player.stretch=1;
+  player.isGlidingDown=false;
+  
   const yarnFill=document.getElementById('yarnFill');
   if(yarnFill)yarnFill.style.width='0%';
   gameLoop=requestAnimationFrame(update);
 }
 
 function jump(){
-  if(!isPlaying||isWinning||isPaused)return;
+  if(!isPlaying||isWinning||isPaused||player.isGlidingDown)return;
   if(player.jumpsLeft>0){
     player.vy=player.jumpsLeft===2?jumpForce:jumpForce*.85;
     player.isJumping=true;
@@ -633,7 +641,9 @@ document.addEventListener('visibilitychange',()=>{
     isPaused=true;
     pauseBtn.innerHTML='▶ Resume';
   }
-});function update() {
+});
+
+function update() {
   gameLoop = 0;
   if (!isPlaying || isPaused) return;
 
@@ -646,19 +656,25 @@ document.addEventListener('visibilitychange',()=>{
   // Player movement and physics
   if (!isWinning && !isFloating) {
     if (isOverdrive) {
+      // Hovering during super mode
       player.y = groundY - 120 + Math.sin(frames * 0.1) * 20;
-
       if (frames % 2 === 0) {
         particles.push({
-          x: player.x + 20,
-          y: player.y + 20,
-          vx: -5,
-          vy: (Math.random() - 0.5) * 2,
-          life: 20,
+          x: player.x + 20, y: player.y + 20, vx: -5, vy: (Math.random() - 0.5) * 2, life: 20,
           color: `hsl(${frames % 360},100%,60%)`
         });
       }
+    } else if (player.isGlidingDown) {
+      // Safe slow landing after overdrive
+      player.vy = 2.5;
+      player.y += player.vy;
+      if (player.y >= groundY - player.height) {
+        player.y = groundY - player.height;
+        player.isGlidingDown = false;
+        player.jumpsLeft = 2;
+      }
     } else {
+      // Normal gravity
       player.vy += gravity;
       player.y += player.vy;
     }
@@ -678,23 +694,16 @@ document.addEventListener('visibilitychange',()=>{
   }
 
   // Ground collision and double-jump reset
-  if (player.y > groundY - player.height && !isFloating && !isOverdrive) {
+  if (player.y > groundY - player.height && !isFloating && !isOverdrive && !player.isGlidingDown) {
     if (player.isJumping) {
       player.squash = 1.3;
       player.stretch = 0.7;
-
       for (let i = 0; i < 8; i++) {
         particles.push({
-          x: player.x + 20,
-          y: player.y + player.height,
-          vx: (Math.random() - 0.5) * 6,
-          vy: Math.random() * -3,
-          life: 30,
-          color: '#94a3b8'
+          x: player.x + 20, y: player.y + player.height, vx: (Math.random() - 0.5) * 6, vy: Math.random() * -3, life: 30, color: '#94a3b8'
         });
       }
     }
-
     player.y = groundY - player.height;
     player.vy = 0;
     player.isJumping = false;
@@ -715,12 +724,12 @@ document.addEventListener('visibilitychange',()=>{
   // End Super-Cat mode
   if (isOverdrive) {
     overdriveTimer--;
-
     if (overdriveTimer <= 0) {
       isOverdrive = false;
       isInvincible = true;
-      invincibleTimer = 120;
-      obstacles = obstacles.filter(o => o.x > player.x + 200);
+      invincibleTimer = 150; // 2.5 seconds safety
+      player.isGlidingDown = true; // Trigger safe landing
+      obstacles = obstacles.filter(o => o.x > player.x + 200); // clear nearby obstacles
     }
   }
 
@@ -731,20 +740,14 @@ document.addEventListener('visibilitychange',()=>{
     obstacles = [];
     rewards = [];
     player.isKissing = true;
-
     winTimer = setTimeout(triggerWinSequence, 2500);
   }
 
   if (isWinning) {
     drawMansaf(groundY);
-
     if (frames % 3 === 0) {
       winHearts.push({
-        x: player.x + 22,
-        y: player.y + 20,
-        vx: (Math.random() - 0.5) * 5,
-        vy: -3 - Math.random() * 3,
-        life: 120,
+        x: player.x + 22, y: player.y + 20, vx: (Math.random() - 0.5) * 5, vy: -3 - Math.random() * 3, life: 120,
         color: Math.random() > 0.5 ? '#ef4444' : '#f472b6'
       });
     }
@@ -753,122 +756,63 @@ document.addEventListener('visibilitychange',()=>{
   // Particles
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life--;
-
+    p.x += p.vx; p.y += p.vy; p.life--;
     ctx.fillStyle = p.color;
     ctx.globalAlpha = Math.max(0, p.life / 30);
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
-
     if (p.life <= 0) particles.splice(i, 1);
   }
 
   // Winning hearts
   for (let i = winHearts.length - 1; i >= 0; i--) {
     const h = winHearts[i];
-
-    h.x += h.vx;
-    h.y += h.vy;
-    h.life--;
-
+    h.x += h.vx; h.y += h.vy; h.life--;
     ctx.fillStyle = h.color;
     ctx.globalAlpha = Math.max(0, h.life / 120);
     drawHeart(h.x, h.y, 14);
     ctx.globalAlpha = 1;
-
     if (h.life <= 0) winHearts.splice(i, 1);
   }
 
   // Draw Hammicha
   if (!isInvincible || Math.floor(frames / 5) % 2 === 0) {
-    drawModernCat(
-      player.x,
-      player.y,
-      player.isJumping,
-      player.isCrying,
-      player.isKissing,
-      player.rotation
-    );
+    drawModernCat(player.x, player.y, player.isJumping, player.isCrying, player.isKissing, player.rotation);
   }
 
   // Obstacles and rewards
   if (!isWinning) {
     const spawnInterval = Math.max(35, Math.floor(100 - speed * 3));
-
-    if (frames % spawnInterval === 0 && !isOverdrive) {
+    if (frames % spawnInterval === 0 && !isOverdrive && !player.isGlidingDown) {
       const types = ['bus', 'mouse', 'cucumber', 'cat'];
       const type = types[Math.floor(Math.random() * types.length)];
-
-      const obsWidth = type === 'bus' ? 60 :
-                       type === 'cucumber' ? 40 : 30;
-
-      const obsHeight = type === 'bus' ? 40 :
-                        type === 'cucumber' ? 15 : 25;
-
-      obstacles.push({
-        x: canvas.width,
-        y: groundY - obsHeight,
-        width: obsWidth,
-        height: obsHeight,
-        type: type
-      });
+      const obsWidth = type === 'bus' ? 60 : type === 'cucumber' ? 40 : 30;
+      const obsHeight = type === 'bus' ? 40 : type === 'cucumber' ? 15 : 25;
+      obstacles.push({ x: canvas.width, y: groundY - obsHeight, width: obsWidth, height: obsHeight, type: type });
     }
 
     // Checkpoint rewards every 10 metres
-    if (
-      distance > 0 &&
-      distance % 10 === 0 &&
-      distance < 50 &&
-      !spawnedMilestones.includes(distance)
-    ) {
+    if (distance > 0 && distance % 10 === 0 && distance < 50 && !spawnedMilestones.includes(distance)) {
       spawnedMilestones.push(distance);
-      hasHeart = true;
-
+      hasHeart = true; // Grant the shield automatically
+      
       checkpointMsg.classList.add('show');
-      setTimeout(() => checkpointMsg.classList.remove('show'), 2000);
+      if (checkpointTimer) clearTimeout(checkpointTimer);
+      checkpointTimer = setTimeout(() => checkpointMsg.classList.remove('show'), 2000);
 
-      rewards.push({
-        x: canvas.width + 150,
-        y: groundY - 120,
-        type: 'treat',
-        speed: speed
-      });
-    } else if (
-      distance > 5 &&
-      distance % 5 === 0 &&
-      distance < 50 &&
-      !spawnedMilestones.includes('food' + distance)
-    ) {
+      rewards.push({ x: canvas.width + 150, y: groundY - 120, type: 'treat', speed: speed });
+    } else if (distance > 5 && distance % 5 === 0 && distance < 50 && !spawnedMilestones.includes('food' + distance)) {
       spawnedMilestones.push('food' + distance);
-
-      rewards.push({
-        x: canvas.width,
-        y: groundY - 120,
-        type: Math.random() > 0.5 ? 'treat' : 'wetfood',
-        speed: speed
-      });
+      rewards.push({ x: canvas.width, y: groundY - 120, type: Math.random() > 0.5 ? 'treat' : 'wetfood', speed: speed });
     }
 
-    // Yarn balls
     if (frames % 80 === 0 && !isOverdrive) {
-      rewards.push({
-        x: canvas.width,
-        y: groundY - 100 - Math.random() * 80,
-        type: 'yarn',
-        speed: speed
-      });
+      rewards.push({ x: canvas.width, y: groundY - 100 - Math.random() * 80, type: 'yarn', speed: speed });
     }
 
-    // Move obstacles and detect collisions
     for (let i = obstacles.length - 1; i >= 0; i--) {
       const obs = obstacles[i];
       obs.x -= speed;
-
       drawObstacle(obs);
 
       const collision =
@@ -879,13 +823,12 @@ document.addEventListener('visibilitychange',()=>{
 
       if (collision) {
         if (isInvincible) {
-          // Ignore collision while protected.
+          // Ignore
         } else if (hasHeart) {
           hasHeart = false;
           isInvincible = true;
           invincibleTimer = 120;
           obstacles = [];
-
           ctx.fillStyle = 'rgba(255,255,255,0.6)';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           break;
@@ -898,18 +841,14 @@ document.addEventListener('visibilitychange',()=>{
       if (obs.x + obs.width < 0) {
         obstacles.splice(i, 1);
         distance++;
-
         if (distance % 5 === 0) speed += 0.4;
       }
     }
 
-    // Move rewards and detect collection
     for (let i = rewards.length - 1; i >= 0; i--) {
       const rew = rewards[i];
-
       rew.x -= speed;
       rew.y = groundY - 120 + Math.sin(frames * 0.05) * 15;
-
       drawReward(rew);
 
       const collected =
@@ -921,31 +860,16 @@ document.addEventListener('visibilitychange',()=>{
       if (collected) {
         if (rew.type === 'treat') treatsCaught++;
         if (rew.type === 'wetfood') wetFoodCaught++;
-
         if (rew.type === 'yarn') {
           yarnCount++;
-
           const yarnFill = document.getElementById('yarnFill');
-          if (yarnFill) {
-            yarnFill.style.width = Math.min(yarnCount * 10, 100) + '%';
-          }
-
-          if (yarnCount >= 10) {
-            overdriveBtn.classList.add('active');
-          }
+          if (yarnFill) yarnFill.style.width = Math.min(yarnCount * 10, 100) + '%';
+          if (yarnCount >= 10) overdriveBtn.classList.add('active');
         }
 
         for (let p = 0; p < 8; p++) {
-          particles.push({
-            x: rew.x + 10,
-            y: rew.y + 10,
-            vx: (Math.random() - 0.5) * 6,
-            vy: (Math.random() - 0.5) * 6,
-            life: 20,
-            color: '#fbbf24'
-          });
+          particles.push({ x: rew.x + 10, y: rew.y + 10, vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6, life: 20, color: '#fbbf24' });
         }
-
         rewards.splice(i, 1);
       } else if (rew.x < -30) {
         rewards.splice(i, 1);
@@ -957,16 +881,11 @@ document.addEventListener('visibilitychange',()=>{
   gameLoop = requestAnimationFrame(update);
 }
 
-// ------------------------------
-// BACKGROUND AND AMMAN SKYLINE
-// ------------------------------
-
 function drawBackground(groundY) {
   const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
   grad.addColorStop(0, '#1e1b4b');
   grad.addColorStop(0.5, '#4c1d95');
   grad.addColorStop(1, '#831843');
-
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -979,22 +898,19 @@ function drawBackground(groundY) {
   ctx.fill();
   ctx.shadowBlur = 0;
 
-  // Jordanian flag
-  drawJordanianFlag(canvas.width * 0.7, groundY - 120, frames);
+  // Jordanian flag (Anchored to the bottom of the canvas)
+  drawJordanianFlag(canvas.width * 0.7, canvas.height - 120, frames);
 
   // Amman skyline
   ctx.fillStyle = '#312e81';
-
   ctx.fillRect(canvas.width * 0.1, groundY - 90, 80, 90);
   ctx.beginPath();
   ctx.arc(canvas.width * 0.1 + 40, groundY - 90, 40, Math.PI, 0);
   ctx.fill();
-
   ctx.fillRect(canvas.width * 0.4, groundY - 50, 120, 50);
   ctx.beginPath();
   ctx.arc(canvas.width * 0.4 + 60, groundY - 50, 60, Math.PI, 0);
   ctx.fill();
-
   ctx.fillRect(canvas.width * 0.8, groundY - 70, 60, 70);
 
   ctx.fillStyle = '#fbbf24';
@@ -1006,7 +922,6 @@ function drawBackground(groundY) {
   // Ground
   ctx.fillStyle = '#0f172a';
   ctx.fillRect(0, groundY, canvas.width, 30);
-
   ctx.fillStyle = '#38bdf8';
   ctx.shadowColor = '#38bdf8';
   ctx.shadowBlur = 10;
@@ -1016,93 +931,55 @@ function drawBackground(groundY) {
 
 function drawJordanianFlag(x, y, time) {
   ctx.fillStyle = '#94a3b8';
+  // Pole goes all the way to the bottom of the screen (y + 120 = canvas.height)
   ctx.fillRect(x, y, 6, 120);
-
   ctx.beginPath();
   ctx.arc(x + 3, y, 6, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.save();
-
   const w = 80;
 
   // Black stripe
   ctx.beginPath();
   ctx.moveTo(x + 6, y);
-  for (let i = 0; i <= w; i++) {
-    const wave = Math.sin(i * 0.1 + time * 0.05) * 5;
-    ctx.lineTo(x + 6 + i, y + wave);
-  }
-  for (let i = w; i >= 0; i--) {
-    const wave = Math.sin(i * 0.1 + time * 0.05) * 5;
-    ctx.lineTo(x + 6 + i, y + 15 + wave);
-  }
-  ctx.fillStyle = '#000';
-  ctx.fill();
+  for (let i = 0; i <= w; i++) { const wave = Math.sin(i * 0.1 + time * 0.05) * 5; ctx.lineTo(x + 6 + i, y + wave); }
+  for (let i = w; i >= 0; i--) { const wave = Math.sin(i * 0.1 + time * 0.05) * 5; ctx.lineTo(x + 6 + i, y + 15 + wave); }
+  ctx.fillStyle = '#000'; ctx.fill();
 
   // White stripe
   ctx.beginPath();
   ctx.moveTo(x + 6, y + 15);
-  for (let i = 0; i <= w; i++) {
-    const wave = Math.sin(i * 0.1 + time * 0.05) * 5;
-    ctx.lineTo(x + 6 + i, y + 15 + wave);
-  }
-  for (let i = w; i >= 0; i--) {
-    const wave = Math.sin(i * 0.1 + time * 0.05) * 5;
-    ctx.lineTo(x + 6 + i, y + 30 + wave);
-  }
-  ctx.fillStyle = '#fff';
-  ctx.fill();
+  for (let i = 0; i <= w; i++) { const wave = Math.sin(i * 0.1 + time * 0.05) * 5; ctx.lineTo(x + 6 + i, y + 15 + wave); }
+  for (let i = w; i >= 0; i--) { const wave = Math.sin(i * 0.1 + time * 0.05) * 5; ctx.lineTo(x + 6 + i, y + 30 + wave); }
+  ctx.fillStyle = '#fff'; ctx.fill();
 
   // Green stripe
   ctx.beginPath();
   ctx.moveTo(x + 6, y + 30);
-  for (let i = 0; i <= w; i++) {
-    const wave = Math.sin(i * 0.1 + time * 0.05) * 5;
-    ctx.lineTo(x + 6 + i, y + 30 + wave);
-  }
-  for (let i = w; i >= 0; i--) {
-    const wave = Math.sin(i * 0.1 + time * 0.05) * 5;
-    ctx.lineTo(x + 6 + i, y + 45 + wave);
-  }
-  ctx.fillStyle = '#10b981';
-  ctx.fill();
+  for (let i = 0; i <= w; i++) { const wave = Math.sin(i * 0.1 + time * 0.05) * 5; ctx.lineTo(x + 6 + i, y + 30 + wave); }
+  for (let i = w; i >= 0; i--) { const wave = Math.sin(i * 0.1 + time * 0.05) * 5; ctx.lineTo(x + 6 + i, y + 45 + wave); }
+  ctx.fillStyle = '#10b981'; ctx.fill();
 
   // Red triangle
   ctx.beginPath();
-  ctx.moveTo(x + 6, y);
-  ctx.lineTo(x + 45, y + 22.5);
-  ctx.lineTo(x + 6, y + 45);
-  ctx.fillStyle = '#ef4444';
-  ctx.fill();
+  ctx.moveTo(x + 6, y); ctx.lineTo(x + 45, y + 22.5); ctx.lineTo(x + 6, y + 45);
+  ctx.fillStyle = '#ef4444'; ctx.fill();
 
-  // White seven-pointed star
+  // White star
   ctx.fillStyle = '#fff';
   ctx.beginPath();
-
-  const cx = x + 18;
-  const cy = y + 22.5;
-  const outerR = 7;
-  const innerR = 3;
-
+  const cx = x + 18; const cy = y + 22.5; const outerR = 7; const innerR = 3;
   for (let i = 0; i < 14; i++) {
     const r = i % 2 === 0 ? outerR : innerR;
     const angle = i * Math.PI / 7 - Math.PI / 2;
     const px = cx + Math.cos(angle) * r;
     const py = cy + Math.sin(angle) * r;
-
-    if (i === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
   }
-
-  ctx.closePath();
-  ctx.fill();
+  ctx.closePath(); ctx.fill();
   ctx.restore();
 }
-
-// ------------------------------
-// GAME PROGRESS DISPLAY
-// ------------------------------
 
 function drawUI() {
   ctx.fillStyle = 'rgba(15,23,42,0.6)';
@@ -1114,22 +991,14 @@ function drawUI() {
   const barWidth = Math.max(20, canvas.width - 200);
 
   ctx.fillStyle = '#334155';
-  ctx.beginPath();
-  ctx.roundRect(120, 28, barWidth, 14, 7);
-  ctx.fill();
-
+  ctx.beginPath(); ctx.roundRect(120, 28, barWidth, 14, 7); ctx.fill();
   ctx.fillStyle = '#38bdf8';
-  ctx.beginPath();
-  ctx.roundRect(120, 28, barWidth * progress, 14, 7);
-  ctx.fill();
-
+  ctx.beginPath(); ctx.roundRect(120, 28, barWidth * progress, 14, 7); ctx.fill();
   ctx.fillStyle = '#ef4444';
 
   for (let i = 1; i < 5; i++) {
     const mx = 120 + barWidth * (i * 10 / 50);
-    ctx.beginPath();
-    ctx.arc(mx, 35, 4, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(mx, 35, 4, 0, Math.PI * 2); ctx.fill();
   }
 
   ctx.fillStyle = '#fff';
@@ -1137,349 +1006,127 @@ function drawUI() {
   ctx.fillText(`${distance}m`, 30, 40);
   ctx.fillText('Mansaf!', Math.max(30, canvas.width - 90), 40);
 
-  if (hasHeart) drawHeart(170, 65, 16);
+  // Fixed: Added fillStyle for the heart so it actually shows up red
+  if (hasHeart) {
+    ctx.fillStyle = '#ef4444';
+    drawHeart(170, 65, 16);
+  }
 }
-
-// ------------------------------
-// HAMMICHA CHARACTER
-// ------------------------------
 
 function drawModernCat(x, y, isJumping, isCrying, isKissing, rotation) {
   ctx.save();
-
   const cx = x + player.width / 2;
   const cy = y + player.height;
-
   ctx.translate(cx, cy);
-
   if (rotation) ctx.rotate(rotation);
-
   ctx.scale(player.squash, player.stretch);
   ctx.translate(-cx, -cy);
 
-  if (isOverdrive) {
-    ctx.shadowColor = `hsl(${frames % 360},100%,50%)`;
-    ctx.shadowBlur = 20;
-  }
+  if (isOverdrive) { ctx.shadowColor = `hsl(${frames % 360},100%,50%)`; ctx.shadowBlur = 20; }
 
-  // Body
   ctx.fillStyle = '#d97736';
-  ctx.beginPath();
-  ctx.roundRect(x + 5, y + 10, 34, 34, 15);
-  ctx.fill();
-
-  // Belly
+  ctx.beginPath(); ctx.roundRect(x + 5, y + 10, 34, 34, 15); ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.roundRect(x + 10, y + 25, 24, 19, 10);
-  ctx.fill();
-
-  // Head
+  ctx.beginPath(); ctx.roundRect(x + 10, y + 25, 24, 19, 10); ctx.fill();
   ctx.fillStyle = '#d97736';
-  ctx.beginPath();
-  ctx.arc(x + 22, y + 15, 20, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 22, y + 15, 20, 0, Math.PI * 2); ctx.fill();
 
-  // Ears
-  ctx.beginPath();
-  ctx.moveTo(x + 5, y + 5);
-  ctx.lineTo(x + 12, y - 15);
-  ctx.lineTo(x + 20, y + 2);
-  ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x + 5, y + 5); ctx.lineTo(x + 12, y - 15); ctx.lineTo(x + 20, y + 2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x + 39, y + 5); ctx.lineTo(x + 32, y - 15); ctx.lineTo(x + 24, y + 2); ctx.fill();
 
-  ctx.beginPath();
-  ctx.moveTo(x + 39, y + 5);
-  ctx.lineTo(x + 32, y - 15);
-  ctx.lineTo(x + 24, y + 2);
-  ctx.fill();
-
-  // Face
   ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.ellipse(x + 22, y + 20, 8, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + 22, y + 20, 8, 10, 0, 0, Math.PI * 2); ctx.fill();
 
   if (isCrying) {
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-
-    ctx.beginPath();
-    ctx.moveTo(x + 12, y + 12);
-    ctx.lineTo(x + 18, y + 14);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(x + 32, y + 12);
-    ctx.lineTo(x + 26, y + 14);
-    ctx.stroke();
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x + 12, y + 12); ctx.lineTo(x + 18, y + 14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 32, y + 12); ctx.lineTo(x + 26, y + 14); ctx.stroke();
   } else if (isKissing) {
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-
-    ctx.beginPath();
-    ctx.arc(x + 15, y + 13, 4, 0, Math.PI, true);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(x + 29, y + 13, 4, 0, Math.PI, true);
-    ctx.stroke();
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x + 15, y + 13, 4, 0, Math.PI, true); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + 29, y + 13, 4, 0, Math.PI, true); ctx.stroke();
   } else {
     ctx.fillStyle = '#000';
-
-    ctx.beginPath();
-    ctx.arc(x + 15, y + 13, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(x + 29, y + 13, 3, 0, Math.PI * 2);
-    ctx.fill();
-
+    ctx.beginPath(); ctx.arc(x + 15, y + 13, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 29, y + 13, 3, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(x + 14, y + 12, 1, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(x + 28, y + 12, 1, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 14, y + 12, 1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 28, y + 12, 1, 0, Math.PI * 2); ctx.fill();
   }
 
-  // Nose
   ctx.fillStyle = '#f472b6';
-  ctx.beginPath();
-  ctx.moveTo(x + 20, y + 18);
-  ctx.lineTo(x + 24, y + 18);
-  ctx.lineTo(x + 22, y + 20);
-  ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x + 20, y + 18); ctx.lineTo(x + 24, y + 18); ctx.lineTo(x + 22, y + 20); ctx.fill();
 
-  // Tail
-  ctx.strokeStyle = '#d97736';
-  ctx.lineWidth = 8;
-  ctx.lineCap = 'round';
-
-  ctx.beginPath();
-  ctx.moveTo(x, y + 35);
-  ctx.quadraticCurveTo(
-    x - 20,
-    y + (isJumping ? 10 : 35),
-    x - 15,
-    y + (isJumping ? 0 : 20)
-  );
-  ctx.stroke();
-
+  ctx.strokeStyle = '#d97736'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x, y + 35); ctx.quadraticCurveTo(x - 20, y + (isJumping ? 10 : 35), x - 15, y + (isJumping ? 0 : 20)); ctx.stroke();
   ctx.restore();
 }
-
-// ------------------------------
-// OBSTACLES
-// ------------------------------
 
 function drawObstacle(obs) {
   ctx.save();
-
   if (obs.type === 'bus') {
-    ctx.fillStyle = '#eab308';
-    ctx.beginPath();
-    ctx.roundRect(obs.x, obs.y + 5, obs.width, obs.height - 5, 8);
-    ctx.fill();
-
-    ctx.fillStyle = '#ef4444';
-    ctx.fillRect(obs.x + 2, obs.y + obs.height - 12, obs.width - 4, 8);
-
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath();
-    ctx.roundRect(obs.x + 8, obs.y + 10, 12, 10, 3);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.roundRect(obs.x + 25, obs.y + 10, 12, 10, 3);
-    ctx.fill();
-
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.arc(obs.x + 15, obs.y + obs.height, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(obs.x + obs.width - 15, obs.y + obs.height, 6, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = '#eab308'; ctx.beginPath(); ctx.roundRect(obs.x, obs.y + 5, obs.width, obs.height - 5, 8); ctx.fill();
+    ctx.fillStyle = '#ef4444'; ctx.fillRect(obs.x + 2, obs.y + obs.height - 12, obs.width - 4, 8);
+    ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.roundRect(obs.x + 8, obs.y + 10, 12, 10, 3); ctx.fill(); ctx.beginPath(); ctx.roundRect(obs.x + 25, obs.y + 10, 12, 10, 3); ctx.fill();
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(obs.x + 15, obs.y + obs.height, 6, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(obs.x + obs.width - 15, obs.y + obs.height, 6, 0, Math.PI * 2); ctx.fill();
   } else if (obs.type === 'mouse') {
-    ctx.fillStyle = '#f8fafc';
-    ctx.beginPath();
-    ctx.ellipse(obs.x + 15, obs.y + 15, 15, 10, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(obs.x + 5, obs.y + 10, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#f472b6';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(obs.x + 28, obs.y + 20);
-    ctx.lineTo(obs.x + 35, obs.y + 25);
-    ctx.stroke();
-
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(obs.x + 22, obs.y + 12, 2, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.ellipse(obs.x + 15, obs.y + 15, 15, 10, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(obs.x + 5, obs.y + 10, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(obs.x + 28, obs.y + 20); ctx.lineTo(obs.x + 35, obs.y + 25); ctx.stroke();
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(obs.x + 22, obs.y + 12, 2, 0, Math.PI * 2); ctx.fill();
   } else if (obs.type === 'cucumber') {
-    ctx.fillStyle = '#22c55e';
-    ctx.beginPath();
-    ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 8);
-    ctx.fill();
-
-    ctx.fillStyle = '#166534';
-    ctx.fillRect(obs.x + 10, obs.y + 2, 3, obs.height - 4);
-    ctx.fillRect(obs.x + 20, obs.y + 2, 3, obs.height - 4);
-    ctx.fillRect(obs.x + 30, obs.y + 2, 3, obs.height - 4);
+    ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 8); ctx.fill();
+    ctx.fillStyle = '#166534'; ctx.fillRect(obs.x + 10, obs.y + 2, 3, obs.height - 4); ctx.fillRect(obs.x + 20, obs.y + 2, 3, obs.height - 4); ctx.fillRect(obs.x + 30, obs.y + 2, 3, obs.height - 4);
   } else if (obs.type === 'cat') {
-    ctx.fillStyle = '#8b5cf6';
-    ctx.beginPath();
-    ctx.roundRect(obs.x + 5, obs.y + 10, 20, 15, 5);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(obs.x + 15, obs.y + 10, 10, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(obs.x + 5, obs.y + 5);
-    ctx.lineTo(obs.x + 10, obs.y - 5);
-    ctx.lineTo(obs.x + 15, obs.y + 5);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(obs.x + 25, obs.y + 5);
-    ctx.lineTo(obs.x + 20, obs.y - 5);
-    ctx.lineTo(obs.x + 15, obs.y + 5);
-    ctx.fill();
-
-    ctx.fillStyle = '#fbbf24';
-    ctx.beginPath();
-    ctx.arc(obs.x + 10, obs.y + 8, 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(obs.x + 20, obs.y + 8, 2, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = '#8b5cf6'; ctx.beginPath(); ctx.roundRect(obs.x + 5, obs.y + 10, 20, 15, 5); ctx.fill();
+    ctx.beginPath(); ctx.arc(obs.x + 15, obs.y + 10, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(obs.x + 5, obs.y + 5); ctx.lineTo(obs.x + 10, obs.y - 5); ctx.lineTo(obs.x + 15, obs.y + 5); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(obs.x + 25, obs.y + 5); ctx.lineTo(obs.x + 20, obs.y - 5); ctx.lineTo(obs.x + 15, obs.y + 5); ctx.fill();
+    ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(obs.x + 10, obs.y + 8, 2, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(obs.x + 20, obs.y + 8, 2, 0, Math.PI * 2); ctx.fill();
   }
-
   ctx.restore();
 }
 
-// ------------------------------
-// COLLECTIBLE REWARDS
-// ------------------------------
-
 function drawReward(rew) {
   if (rew.type === 'treat') {
-    ctx.fillStyle = '#eab308';
-    ctx.shadowColor = '#eab308';
-    ctx.shadowBlur = 10;
-
-    ctx.beginPath();
-    ctx.roundRect(rew.x, rew.y, 25, 18, 6);
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#854d0e';
-    ctx.fillRect(rew.x + 5, rew.y + 4, 15, 10);
-
+    ctx.fillStyle = '#eab308'; ctx.shadowColor = '#eab308'; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.roundRect(rew.x, rew.y, 25, 18, 6); ctx.fill();
+    ctx.shadowBlur = 0; ctx.fillStyle = '#854d0e'; ctx.fillRect(rew.x + 5, rew.y + 4, 15, 10);
   } else if (rew.type === 'wetfood') {
-    ctx.fillStyle = '#ef4444';
-    ctx.shadowColor = '#ef4444';
-    ctx.shadowBlur = 10;
-
-    ctx.beginPath();
-    ctx.roundRect(rew.x, rew.y, 26, 20, 4);
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#cbd5e1';
-    ctx.fillRect(rew.x - 2, rew.y - 2, 30, 4);
-
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(rew.x + 4, rew.y + 6, 18, 8);
-
+    ctx.fillStyle = '#ef4444'; ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.roundRect(rew.x, rew.y, 26, 20, 4); ctx.fill();
+    ctx.shadowBlur = 0; ctx.fillStyle = '#cbd5e1'; ctx.fillRect(rew.x - 2, rew.y - 2, 30, 4);
+    ctx.fillStyle = '#fff'; ctx.fillRect(rew.x + 4, rew.y + 6, 18, 8);
   } else if (rew.type === 'yarn') {
-    ctx.fillStyle = '#f472b6';
-    ctx.shadowColor = '#f472b6';
-    ctx.shadowBlur = 15;
-
-    ctx.beginPath();
-    ctx.arc(rew.x + 12, rew.y + 12, 15, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#fff';
-
-    ctx.beginPath();
-    ctx.arc(rew.x + 8, rew.y + 8, 5, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = '#f472b6'; ctx.shadowColor = '#f472b6'; ctx.shadowBlur = 15;
+    ctx.beginPath(); ctx.arc(rew.x + 12, rew.y + 12, 15, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0; ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(rew.x + 8, rew.y + 8, 5, 0, Math.PI * 2); ctx.fill();
   }
 }
-
-// ------------------------------
-// MANSaf WINNING SCENE
-// ------------------------------
 
 function drawMansaf(groundY) {
   const cx = canvas.width - 100;
   const cy = groundY;
+  ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 40;
 
-  ctx.shadowColor = '#fbbf24';
-  ctx.shadowBlur = 40;
+  ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.ellipse(cx, cy, 80, 25, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.ellipse(cx, cy - 10, 60, 20, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#b45309'; ctx.beginPath(); ctx.roundRect(cx - 20, cy - 30, 40, 25, 10); ctx.fill(); ctx.fillRect(cx - 10, cy - 40, 8, 15);
+  ctx.fillStyle = '#d97706'; ctx.beginPath(); ctx.ellipse(cx, cy - 15, 50, 15, 0, 0, Math.PI); ctx.fill();
 
-  ctx.fillStyle = '#f8fafc';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, 80, 25, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#fef08a';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy - 10, 60, 20, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#b45309';
-  ctx.beginPath();
-  ctx.roundRect(cx - 20, cy - 30, 40, 25, 10);
-  ctx.fill();
-
-  ctx.fillRect(cx - 10, cy - 40, 8, 15);
-
-  ctx.fillStyle = '#d97706';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy - 15, 50, 15, 0, 0, Math.PI);
-  ctx.fill();
-
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-  ctx.lineWidth = 3;
-
+  ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 3;
   for (let i = 0; i < 3; i++) {
     ctx.beginPath();
     const wave = Math.sin(frames * 0.05 + i) * 10;
-
     ctx.moveTo(cx - 20 + i * 20, cy - 40);
-    ctx.quadraticCurveTo(
-      cx - 30 + i * 20 + wave,
-      cy - 60,
-      cx - 20 + i * 20,
-      cy - 80
-    );
+    ctx.quadraticCurveTo(cx - 30 + i * 20 + wave, cy - 60, cx - 20 + i * 20, cy - 80);
     ctx.stroke();
   }
 }
 
-// ------------------------------
-// HEART DRAWING
-// ------------------------------
-
 function drawHeart(x, y, size) {
   ctx.beginPath();
-
   ctx.moveTo(x, y + size / 4);
   ctx.quadraticCurveTo(x, y, x + size / 4, y);
   ctx.quadraticCurveTo(x + size / 2, y, x + size / 2, y + size / 4);
@@ -1492,32 +1139,21 @@ function drawHeart(x, y, size) {
   ctx.fill();
 }
 
-// ------------------------------
-// WINNING AND GAME OVER
-// ------------------------------
-
 function triggerWinSequence() {
   winTimer = 0;
   isPlaying = false;
-
   if (gameLoop) cancelAnimationFrame(gameLoop);
   gameLoop = 0;
 
   pauseBtn.style.display = 'none';
   overlay.style.display = 'flex';
-
   overlay.innerHTML = `
     <h3 style="color:#fbbf24;">Mansaf Time! 🥘</h3>
-    <p style="font-size:1.2rem;margin:10px 0;color:#fff;">
-      You ran all 50 meters safely through Amman!
-    </p>
+    <p style="font-size:1.2rem;margin:10px 0;color:#fff;">You ran all 50 meters safely through Amman!</p>
     <p style="margin-bottom:20px;max-width:90%;line-height:1.4;color:#cbd5e1;">
       Hammicha is enjoying her Mansaf and sending you kisses! 💋<br>
-      She caught <strong>${treatsCaught}</strong> treats and
-      <strong>${wetFoodCaught}</strong> wet foods.<br><br>
-      <strong style="color:#f472b6;font-size:1.2rem;">
-        She is ready for her new forever family. Will it be you?
-      </strong>
+      She caught <strong>${treatsCaught}</strong> treats and <strong>${wetFoodCaught}</strong> wet foods.<br><br>
+      <strong style="color:#f472b6;font-size:1.2rem;">She is ready for her new forever family. Will it be you?</strong>
     </p>
     <button class="game-btn" onclick="startGame()">Play Again</button>
   `;
@@ -1526,33 +1162,26 @@ function triggerWinSequence() {
 function gameOver() {
   isPlaying = false;
   isPaused = false;
-
   if (gameLoop) cancelAnimationFrame(gameLoop);
   gameLoop = 0;
 
   pauseBtn.style.display = 'none';
   player.isCrying = true;
-
   obstacles = [];
   rewards = [];
 
   requestAnimationFrame(drawGameOverState);
 
   if (gameOverTimer) clearTimeout(gameOverTimer);
-
   gameOverTimer = setTimeout(() => {
     gameOverTimer = 0;
     overlay.style.display = 'flex';
-
     overlay.innerHTML = `
       <h3 style="color:#ef4444;">Meow... I tripped!</h3>
-      <p style="font-size:1.2rem;margin:10px 0;color:#fff;">
-        You ran ${distance} meters.
-      </p>
+      <p style="font-size:1.2rem;margin:10px 0;color:#fff;">You ran ${distance} meters.</p>
       <p style="margin-bottom:20px;max-width:90%;line-height:1.4;color:#cbd5e1;">
         Hammicha is crying! 😿<br>
-        She caught <strong>${treatsCaught}</strong> treats and
-        <strong>${wetFoodCaught}</strong> wet foods.<br><br>
+        She caught <strong>${treatsCaught}</strong> treats and <strong>${wetFoodCaught}</strong> wet foods.<br><br>
         You were almost to the Mansaf! Want to try again?
       </p>
       <button class="game-btn" onclick="startGame()">Try Again</button>
@@ -1561,35 +1190,26 @@ function gameOver() {
 }
 
 function drawGameOverState() {
+  if (isPlaying) return; // Stop drawing if the game restarted
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, '#1e1b4b');
-  gradient.addColorStop(1, '#831843');
+  gradient.addColorStop(0, '#1e1b4b'); gradient.addColorStop(1, '#831843');
+  ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = '#0f172a';
-  ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+  ctx.fillStyle = '#0f172a'; ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
 
   drawModernCat(player.x, player.y, false, true, false, 0);
 
   if (player.isCrying) {
     ctx.fillStyle = '#38bdf8';
     const tearY = player.y + 20 + (Date.now() / 80) % 40;
-
-    ctx.beginPath();
-    ctx.arc(player.x + 15, tearY, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(player.x + 29, tearY, 3, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(player.x + 15, tearY, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(player.x + 29, tearY, 3, 0, Math.PI * 2); ctx.fill();
+    requestAnimationFrame(drawGameOverState);
   }
 }
 
-// Set initial game canvas size
 resizeCanvas();
 </script>
 </body>
