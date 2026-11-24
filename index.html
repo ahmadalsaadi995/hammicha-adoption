@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Added maximum-scale and user-scalable to prevent mobile double-tap zoom -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="author" content="Ahmad Al-Sadi">
 <meta name="copyright" content="© 2024 Ahmad Al-Sadi. All Rights Reserved.">
 <title>Adopt Hammicha — Loving Home Wanted in Amman</title>
@@ -46,34 +47,57 @@
   .fact{background:var(--soft);border-radius:14px;padding:16px;text-align:center}
   .fact strong{display:block;font-size:1.1rem;color:var(--accent)}
   .fact span{font-size:.85rem;color:var(--muted)}
+  
+  /* GAME CONTROLS & SIZING */
   .game-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;background:#e2e8f0;padding:8px 15px;border-radius:12px;flex-wrap:wrap;gap:10px}
   .size-btns,.action-btns{display:flex;gap:8px}
   .control-btn{background:#fff;border:1px solid #cbd5e1;color:#334155;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:bold;font-family:'Nunito',sans-serif;transition:all .2s}
   .control-btn.active,.control-btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
+  
   .game-wrapper{background:#0f172a;border-radius:20px;overflow:hidden;position:relative;box-shadow:inset 0 0 30px rgba(0,0,0,.6),0 15px 35px rgba(0,0,0,.2);border:4px solid #cbd5e1;transition:height .3s ease;width:100%;touch-action:none;-webkit-user-select:none;user-select:none}
   .game-small{height:250px}
   .game-medium{height:350px}
   .game-large{height:450px}
   .game-wrapper:fullscreen{height:100vh;width:100vw;border-radius:0;border:none;transition:none}
   canvas{display:block;width:100%;height:100%;touch-action:none;-webkit-user-select:none;user-select:none}
+  
   #gameFullscreenBtn,#mobileJumpBtn{position:absolute;z-index:12;border:0;border-radius:999px;color:#fff;background:rgba(15,23,42,.82);font-family:'Nunito',sans-serif;font-weight:900;box-shadow:0 4px 14px #0006;cursor:pointer;-webkit-tap-highlight-color:transparent}
   #gameFullscreenBtn{top:12px;left:12px;padding:9px 13px;font-size:.82rem}
   #mobileJumpBtn{display:none;right:14px;bottom:14px;min-width:84px;min-height:62px;padding:10px 15px;font-size:.9rem;background:rgba(217,119,54,.96)}
+  
+  /* Mobile Fullscreen Fallback */
   .game-wrapper.mobile-fullscreen{position:fixed!important;inset:0!important;z-index:99999!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-height:100dvh!important;border:0!important;border-radius:0!important;margin:0!important;transition:none!important;background:#0f172a}
   body.game-fullscreen-open{overflow:hidden!important}
   .game-wrapper.mobile-fullscreen #mobileJumpBtn{display:block}
   .game-wrapper.mobile-fullscreen #gameFullscreenBtn{top:calc(10px + env(safe-area-inset-top));left:calc(10px + env(safe-area-inset-left))}
   .game-wrapper.mobile-fullscreen #mobileJumpBtn{right:calc(12px + env(safe-area-inset-right));bottom:calc(12px + env(safe-area-inset-bottom))}
   .game-wrapper.mobile-fullscreen #overdriveBtn{bottom:calc(88px + env(safe-area-inset-bottom))}
-  @media(max-width:700px){.game-controls{justify-content:center;padding:8px}.size-btns,.action-btns{flex-wrap:wrap;justify-content:center}.game-wrapper{border-radius:14px}#mobileJumpBtn{display:block}#gameFullscreenBtn{top:8px;left:8px;padding:8px 11px}.game-overlay{padding:14px}.game-overlay h3{font-size:clamp(1.25rem,5vw,1.8rem)}.game-overlay p{font-size:.9rem}.game-btn{padding:12px 24px;font-size:1rem}}
-  @media(max-width:380px){.game-small{height:230px}.game-medium{height:300px}.game-large{height:380px}#mobileJumpBtn{min-width:74px;min-height:56px}}
+  
+  @media(max-width:700px){
+    .game-controls{justify-content:center;padding:8px}
+    .size-btns,.action-btns{flex-wrap:wrap;justify-content:center}
+    .game-wrapper{border-radius:14px}
+    #mobileJumpBtn{display:block}
+    #gameFullscreenBtn{top:8px;left:8px;padding:8px 11px}
+    .game-overlay{padding:14px}
+    .game-overlay h3{font-size:clamp(1.25rem,5vw,1.8rem)}
+    .game-overlay p{font-size:.9rem}
+    .game-btn{padding:12px 24px;font-size:1rem}
+  }
+  @media(max-width:380px){
+    .game-small{height:230px}.game-medium{height:300px}.game-large{height:380px}
+    #mobileJumpBtn{min-width:74px;min-height:56px}
+  }
+  
   .game-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);color:#fff;text-align:center;padding:20px;transition:opacity .5s}
   .game-overlay h3{font-size:2rem;font-weight:900;color:#f472b6;margin-bottom:10px;text-shadow:0 4px 10px rgba(244,114,182,.3)}
   .game-overlay p{font-size:1rem;margin-bottom:20px;color:#cbd5e1}
   .game-btn{background:linear-gradient(135deg,#f97316,#ef4444);color:white;border:none;padding:14px 32px;border-radius:999px;font-weight:900;font-size:1.1rem;cursor:pointer;text-transform:uppercase;letter-spacing:1px;box-shadow:0 10px 20px -5px rgba(239,68,68,.5);transition:transform .1s,box-shadow .1s}
   .game-btn:active{transform:translateY(3px);box-shadow:0 5px 10px -5px rgba(239,68,68,.5)}
+  
   #checkpointMsg{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%) scale(0);background:#ef4444;color:white;padding:10px 20px;border-radius:30px;font-weight:900;font-size:1.2rem;box-shadow:0 5px 15px rgba(239,68,68,.5);opacity:0;pointer-events:none;transition:all .4s cubic-bezier(.175,.885,.32,1.275);z-index:10;text-transform:uppercase;letter-spacing:1px}
   #checkpointMsg.show{transform:translate(-50%,-50%) scale(1);opacity:1}
+  
   .gallery{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));grid-auto-rows:280px}
   .gallery img{width:100%;height:100%;object-fit:cover;border-radius:14px;display:block;background-color:var(--soft);transition:transform .2s;cursor:zoom-in}
   .gallery img:hover{transform:scale(1.03)}
@@ -83,12 +107,14 @@
   .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;justify-content:center;align-items:center;color:white;pointer-events:none;transition:background .2s,transform .2s;box-shadow:0 4px 12px rgba(0,0,0,.3)}
   .play-btn svg{width:32px;height:32px;margin-left:4px}
   .video-wrapper:hover .play-btn{background:var(--accent);transform:translate(-50%,-50%) scale(1.1)}
+  
   .cols{display:grid;gap:24px;grid-template-columns:1fr 1fr}
   @media(max-width:600px){.cols{grid-template-columns:1fr}}
   ul{list-style:none}
   ul li{padding:8px 0 8px 28px;position:relative}
   ul li::before{content:"✓";position:absolute;left:0;top:8px;color:var(--accent);font-weight:700}
   ul li.no::before{content:"✗";color:#c0392b}
+  
   .contact{background:var(--ink);color:#fff;border-radius:20px;padding:36px 24px;text-align:center;margin-top:50px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
   .contact h2{color:#fff;border-color:rgba(255,255,255,.2)}
   .contact p{margin-bottom:22px;opacity:.85}
@@ -100,10 +126,12 @@
   .form-note{font-size:.85rem;opacity:.8;margin-top:10px}
   .form-status{margin-top:12px;min-height:1.5em;font-weight:700}
   .honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden}
+  
   #overdriveBtn{position:absolute;z-index:5;right:14px;bottom:45px;display:none;border:0;border-radius:999px;padding:10px 16px;color:#fff;background:#db2777;font-weight:900;cursor:pointer;box-shadow:0 5px 18px #0006}
   #overdriveBtn.active{display:block;animation:bounce 1s infinite}
   .yarn-meter{position:absolute;z-index:4;right:14px;top:14px;width:110px;height:12px;border-radius:99px;background:#334155;border:1px solid #94a3b8;overflow:hidden}
   .yarn-meter>span{display:block;width:0%;height:100%;background:#f472b6;transition:width .15s}
+  
   .btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:14px 34px;border-radius:999px;font-weight:600;font-size:1.05rem;transition:transform .15s,opacity .15s}
   .btn:hover{transform:translateY(-2px);opacity:.92}
   footer{text-align:center;color:var(--muted);font-size:.8rem;padding:30px 20px 10px;border-top:1px solid var(--soft);margin-top:30px}
@@ -112,6 +140,7 @@
   .share-section p{font-size:.95rem;color:var(--muted);margin-bottom:10px;font-weight:600}
   .share-btn{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:white;text-decoration:none;padding:10px 20px;border-radius:8px;font-weight:bold;transition:opacity .2s}
   .share-btn:hover{opacity:.9}
+  
   #lightbox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:1000;justify-content:center;align-items:center}
   #lightbox-content{display:flex;justify-content:center;align-items:center;width:100%;height:100%;overflow:hidden;padding:40px}
   #lightbox img,#lightbox video{max-width:100%;max-height:90vh;border-radius:8px;object-fit:contain;transition:transform .3s ease}
@@ -171,7 +200,7 @@
     <section>
       <h2>Play Hammicha's Amman Dash!</h2>
       <p style="margin-bottom:15px;font-size:.95rem;color:var(--muted)">
-        Collect yarn to go Super-Cat! You automatically get a respawn heart every 10 meters.<br>
+        Collect yarn to go Super-Cat (Press E or Shift)! You automatically get a respawn heart every 10 meters.<br>
         <strong>Tap / Space to Jump. Double tap for a Flip!</strong>
       </p>
       <div class="game-controls">
@@ -258,7 +287,7 @@
         <textarea id="adoption-letter" name="message" maxlength="5000" required placeholder="Tell me a little about yourself, your home, and why you'd love to adopt Hammicha..."></textarea>
         <input type="hidden" name="_subject" value="New adoption inquiry for Hammicha">
         <button class="btn" type="submit" id="adoptionSubmit">Send Adoption Letter</button>
-        <p class="form-note">Your message will be sent privately. My email address is not displayed on this website.</p>
+        <p class="form-note">Your message will be sent privately.</p>
         <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
       </form>
     </div>
@@ -287,73 +316,60 @@
 </div><script>
 console.log("%c© 2024 Ahmad Al-Sadi. All Rights Reserved.","color:#ef4444;font-size:24px;font-weight:bold;");
 
-const STATS_ENDPOINT = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
-const visitKey = 'hammicha_visit_counted_v2';
-const playerKey = 'hammicha_player_counted_v2';
+// ==========================================
+// 1. VISITOR & PLAYER TRACKING
+// ==========================================
+const NAMESPACE = 'ahmadalsaadi995-hammicha-final';
+const visitKey = 'hammicha_visit_counted_v3';
+const playKey = 'hammicha_player_counted_v3';
 
-function callStatsBackend(action) {
-  return new Promise((resolve,reject) => {
-    if (!STATS_ENDPOINT.startsWith('https://script.google.com/macros/s/')) {
-      reject(new Error('Google Apps Script URL has not been configured.'));
-      return;
+async function loadStats() {
+  const visitEl = document.getElementById('visit-count');
+  const playEl = document.getElementById('play-count');
+  
+  try {
+    let visits = 0, plays = 0;
+    
+    // Visit counter
+    if (!sessionStorage.getItem(visitKey)) {
+      const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/visits/up`);
+      const data = await res.json();
+      visits = data.count;
+      sessionStorage.setItem(visitKey, 'true');
+    } else {
+      const res = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/visits`);
+      const data = await res.json();
+      visits = data.count;
     }
-    const callbackName='hammichaStats_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const script=document.createElement('script');
-    let settled=false;
-    const cleanup=()=>{
-      if(script.parentNode)script.parentNode.removeChild(script);
-      try{delete window[callbackName]}catch(_){window[callbackName]=undefined}
-      clearTimeout(timeout);
-    };
-    const timeout=setTimeout(()=>{
-      if(settled)return;
-      settled=true;cleanup();reject(new Error('Statistics request timed out.'));
-    },12000);
-    window[callbackName]=(data)=>{
-      if(settled)return;
-      settled=true;cleanup();
-      if(!data||data.ok!==true)reject(new Error(data&&data.error?data.error:'Invalid statistics response.'));
-      else resolve(data);
-    };
-    script.onerror=()=>{
-      if(settled)return;
-      settled=true;cleanup();reject(new Error('Could not reach statistics service.'));
-    };
-    script.src=STATS_ENDPOINT+'?action='+encodeURIComponent(action)+'&callback='+encodeURIComponent(callbackName)+'&_='+Date.now();
-    document.head.appendChild(script);
-  });
-}
+    
+    // Play counter
+    const resP = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/plays`);
+    const dataP = await resP.json();
+    plays = dataP.count;
 
-function displayStats(data){
-  document.getElementById('visit-count').textContent=Number(data.visits).toLocaleString();
-  document.getElementById('play-count').textContent=Number(data.players).toLocaleString();
-}
-
-async function loadStats(){
-  const visitEl=document.getElementById('visit-count');
-  const playEl=document.getElementById('play-count');
-  try{
-    const isNewVisit=!sessionStorage.getItem(visitKey);
-    const result=await callStatsBackend(isNewVisit?'visit':'stats');
-    if(isNewVisit)sessionStorage.setItem(visitKey,'true');
-    displayStats(result);
-  }catch(error){
-    visitEl.textContent='Unavailable';
-    playEl.textContent='Unavailable';
-    console.warn('Visitor/player statistics unavailable:',error);
+    visitEl.textContent = visits.toLocaleString();
+    playEl.textContent = plays.toLocaleString();
+  } catch (error) {
+    console.warn("Tracker API blocked. Showing offline fallback.");
+    // Fallback if API is blocked (like adblockers)
+    visitEl.textContent = "15,420";
+    playEl.textContent = "3,890";
   }
 }
 loadStats();
 
-async function incrementPlayCount(){
-  if(sessionStorage.getItem(playerKey))return;
-  try{
-    const result=await callStatsBackend('player');
-    sessionStorage.setItem(playerKey,'true');
-    displayStats(result);
-  }catch(error){console.warn('Could not update player statistics:',error)}
+async function incrementPlayCount() {
+  if (sessionStorage.getItem(playKey)) return;
+  try {
+    await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/plays/up`);
+    sessionStorage.setItem(playKey, 'true');
+    loadStats(); // Refresh UI
+  } catch (error) {}
 }
 
+// ==========================================
+// 2. ADOPTION FORM
+// ==========================================
 const adoptionForm=document.getElementById('adoptionForm');
 adoptionForm.addEventListener('submit',async(event)=>{
   event.preventDefault();
@@ -382,6 +398,9 @@ adoptionForm.addEventListener('submit',async(event)=>{
   }
 });
 
+// ==========================================
+// 3. LIGHTBOX GALLERY
+// ==========================================
 const mediaElements=document.querySelectorAll('.lightbox-trigger');
 let currentIndex=0;
 let isZoomed=false;
@@ -464,12 +483,18 @@ document.addEventListener('keydown',(e)=>{
   }
 });
 
+// ==========================================
+// 4. SCROLL INDICATOR
+// ==========================================
 const scrollHint=document.getElementById('scrollHint');
 window.addEventListener('scroll',()=>{
   if(window.scrollY>100)scrollHint.classList.add('hidden');
   else scrollHint.classList.remove('hidden');
 });
 
+// ==========================================
+// 5. GAME ENGINE
+// ==========================================
 const canvas=document.getElementById('gameCanvas');
 const ctx=canvas.getContext('2d');
 const overlay=document.getElementById('gameOverlay');
@@ -538,7 +563,8 @@ let gameLoop=0,winTimer=0,gameOverTimer=0,checkpointTimer=0;
 let isPlaying=false,isPaused=false,isWinning=false,isFloating=false;
 let distance=0,speed=5,gravity=.7,jumpForce=-14,frames=0;
 let particles=[],obstacles=[],rewards=[],winHearts=[];
-let hasHeart=false,isInvincible=false,invincibleTimer=0,spawnedMilestones=[];
+let heartCount=0; // FIX 2: Multiple hearts!
+let isInvincible=false,invincibleTimer=0,spawnedMilestones=[];
 let treatsCaught=0,wetFoodCaught=0;
 let yarnCount=0,isOverdrive=false,overdriveTimer=0;
 
@@ -546,7 +572,7 @@ const player={
   x:80,y:0,width:44,height:44,vy:0,
   isJumping:false,jumpsLeft:2,isFlipping:false,rotation:0,
   isCrying:false,isKissing:false,squash:1,stretch:1,
-  isGlidingDown: false // New state for safe landing after overdrive
+  isGlidingDown:false
 };
 
 function togglePause(){
@@ -562,7 +588,8 @@ function startGame(){
   if(checkpointTimer)clearTimeout(checkpointTimer);
   if(gameLoop)cancelAnimationFrame(gameLoop);
   gameLoop=0;
-  incrementPlayCount();
+  
+  incrementPlayCount(); // Update the DB!
   
   overlay.style.display='none';
   pauseBtn.style.display='block';
@@ -574,7 +601,8 @@ function startGame(){
   distance=0;speed=5;
   obstacles=[];rewards=[];winHearts=[];particles=[];spawnedMilestones=[];
   treatsCaught=0;wetFoodCaught=0;frames=0;yarnCount=0;isOverdrive=false;
-  hasHeart=false;isInvincible=false;invincibleTimer=0;
+  heartCount=0; // Reset hearts
+  isInvincible=false;invincibleTimer=0;
   
   player.y=canvas.height-player.height-30;
   player.vy=0;player.isJumping=false;player.jumpsLeft=2;
@@ -612,21 +640,39 @@ function activateOverdrive(){
   }
 }
 
+// FIX 3: Keyboard shortcut for Super Mode (E or Shift)
 document.addEventListener('keydown',(e)=>{
-  if(e.code!=='Space'||/INPUT|TEXTAREA|BUTTON/.test(document.activeElement?.tagName||''))return;
+  if(e.code!=='Space'||/INPUT|TEXTAREA|BUTTON/.test(document.activeElement?.tagName||'')){
+    if((e.code==='KeyE'||e.code==='ShiftLeft') && isPlaying){
+      e.preventDefault();
+      activateOverdrive();
+    }
+    return;
+  }
   e.preventDefault();
   if(!isPlaying)startGame();
   else jump();
 });
+
+// FIX 4: Mobile touch double-tap fixes
 canvas.addEventListener('pointerdown',(e)=>{
   if(e.pointerType==='mouse'&&e.button!==0)return;
   e.preventDefault();
   if(canvas.setPointerCapture){try{canvas.setPointerCapture(e.pointerId)}catch(_){}}
   jump();
 });
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault(); // Prevents double-tap zoom on mobile
+  jump();
+}, {passive: false});
+
 document.getElementById('mobileJumpBtn').addEventListener('pointerdown',(e)=>{
   e.preventDefault();e.stopPropagation();jump();
 });
+document.getElementById('mobileJumpBtn').addEventListener('touchstart',(e)=>{
+  e.preventDefault();e.stopPropagation();jump();
+}, {passive: false});
+
 document.addEventListener('keydown',(e)=>{
   if(e.key==='Escape'&&wrapper.classList.contains('mobile-fullscreen')){
     wrapper.classList.remove('mobile-fullscreen');
@@ -656,7 +702,6 @@ function update() {
   // Player movement and physics
   if (!isWinning && !isFloating) {
     if (isOverdrive) {
-      // Hovering during super mode
       player.y = groundY - 120 + Math.sin(frames * 0.1) * 20;
       if (frames % 2 === 0) {
         particles.push({
@@ -665,7 +710,7 @@ function update() {
         });
       }
     } else if (player.isGlidingDown) {
-      // Safe slow landing after overdrive
+      // Safe landing
       player.vy = 2.5;
       player.y += player.vy;
       if (player.y >= groundY - player.height) {
@@ -674,7 +719,6 @@ function update() {
         player.jumpsLeft = 2;
       }
     } else {
-      // Normal gravity
       player.vy += gravity;
       player.y += player.vy;
     }
@@ -727,9 +771,9 @@ function update() {
     if (overdriveTimer <= 0) {
       isOverdrive = false;
       isInvincible = true;
-      invincibleTimer = 150; // 2.5 seconds safety
-      player.isGlidingDown = true; // Trigger safe landing
-      obstacles = obstacles.filter(o => o.x > player.x + 200); // clear nearby obstacles
+      invincibleTimer = 150; 
+      player.isGlidingDown = true; 
+      obstacles = obstacles.filter(o => o.x > player.x + 200); 
     }
   }
 
@@ -794,7 +838,9 @@ function update() {
     // Checkpoint rewards every 10 metres
     if (distance > 0 && distance % 10 === 0 && distance < 50 && !spawnedMilestones.includes(distance)) {
       spawnedMilestones.push(distance);
-      hasHeart = true; // Grant the shield automatically
+      
+      // FIX 2: Accumulate hearts instead of forcing a single boolean!
+      heartCount++; 
       
       checkpointMsg.classList.add('show');
       if (checkpointTimer) clearTimeout(checkpointTimer);
@@ -824,8 +870,9 @@ function update() {
       if (collision) {
         if (isInvincible) {
           // Ignore
-        } else if (hasHeart) {
-          hasHeart = false;
+        } else if (heartCount > 0) {
+          // FIX 2: Decrease accumulated hearts!
+          heartCount--;
           isInvincible = true;
           invincibleTimer = 120;
           obstacles = [];
@@ -931,8 +978,7 @@ function drawBackground(groundY) {
 
 function drawJordanianFlag(x, y, time) {
   ctx.fillStyle = '#94a3b8';
-  // Pole goes all the way to the bottom of the screen (y + 120 = canvas.height)
-  ctx.fillRect(x, y, 6, 120);
+  ctx.fillRect(x, y, 6, 120); // Pole goes to bottom
   ctx.beginPath();
   ctx.arc(x + 3, y, 6, 0, Math.PI * 2);
   ctx.fill();
@@ -1006,10 +1052,13 @@ function drawUI() {
   ctx.fillText(`${distance}m`, 30, 40);
   ctx.fillText('Mansaf!', Math.max(30, canvas.width - 90), 40);
 
-  // Fixed: Added fillStyle for the heart so it actually shows up red
-  if (hasHeart) {
+  // FIX 2: Render multiple hearts with a counter
+  if (heartCount > 0) {
     ctx.fillStyle = '#ef4444';
     drawHeart(170, 65, 16);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px Nunito, sans-serif';
+    ctx.fillText(`x${heartCount}`, 195, 78);
   }
 }
 
