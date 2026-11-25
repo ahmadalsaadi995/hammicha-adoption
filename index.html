@@ -196,6 +196,7 @@ footer strong{color:var(--ink)}
 <div class="contact" id="adopt">
   <h2>Interested in Adopting Hammicha?</h2>
   <p>Location: Amman, Jordan<br><strong>Adoption Fee: None (Free to a good home)</strong></p>
+  <!-- ⚠️ REPLACE THE LINK BELOW WITH YOUR FORMSPREE LINK (e.g., https://formspree.io/f/mbjlqkzn) -->
   <form id="adoptionForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
     <div class="hp" aria-hidden="true"><label>Leave empty<input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
     <label for="n">Your name *</label><input id="n" name="name" maxlength="100" autocomplete="name" required>
@@ -205,7 +206,7 @@ footer strong{color:var(--ink)}
     <textarea id="m" name="message" maxlength="5000" required placeholder="Tell me a little about yourself, your home, and why you'd love to adopt Hammicha..."></textarea>
     <input type="hidden" name="_subject" value="New adoption inquiry for Hammicha">
     <button class="btn" type="submit" id="adoptionSubmit">Send Adoption Letter</button>
-    <p class="note">Your message will be sent privately.</p>
+    <p class="note">Your message is sent directly to the owner privately. Your data is safe.</p>
     <p id="formStatus" role="status" aria-live="polite"></p>
   </form>
 </div>
@@ -217,7 +218,7 @@ footer strong{color:var(--ink)}
 
 <footer>
   Serious inquiries only · Home screening applies · Ahmad, Amman<br><br>
-  <strong>© 2024 Ahmad Al-Sadi. All Rights Reserved.</strong><br>
+  <strong id="copyright-year">© 2024 Ahmad Al-Sadi. All Rights Reserved.</strong><br>
   The design, code, and "Amman Dash" game on this website are the intellectual property of the author. Unauthorized reproduction or distribution is strictly prohibited.
 </footer>
 </div></div>
@@ -233,10 +234,16 @@ footer strong{color:var(--ink)}
 <script>
 const $=id=>document.getElementById(id);
 
+/* ============ IP PROTECTION & DYNAMIC YEAR ============ */
+const currentYear = new Date().getFullYear();
+document.getElementById('copyright-year').innerHTML = `© ${currentYear} Ahmad Al-Sadi. All Rights Reserved.`;
+console.log(`%c© ${currentYear} Ahmad Al-Sadi. All Rights Reserved.`, "color:#ef4444;font-size:24px;font-weight:bold;text-shadow:1px 1px 0 #000;");
+console.log("%cThe code, design, and 'Amman Dash' game are the intellectual property of the author. Unauthorized copying or distribution is strictly prohibited.", "color:#f97316;font-size:14px;font-weight:bold;");
+
 /* ============ 1. REAL VISITOR & PLAYER COUNTERS ============ */
 const API='https://api.counterapi.dev/v1/ahmadalsaadi995-hammicha-final/';
 const ss={get:k=>{try{return sessionStorage.getItem(k)}catch(e){return null}},set:k=>{try{sessionStorage.setItem(k,'1')}catch(e){}}};
-// returns the real count, 0 if the counter doesn't exist yet, or null if the service is unreachable (never fake numbers)
+
 async function cnt(name,up){
   try{
     const r=await fetch(API+name+(up?'/up':''));
@@ -252,12 +259,12 @@ async function showStats(countVisit){
   $('visit-count').textContent=fmt(v);$('play-count').textContent=fmt(p);
 }
 (function(){const first=!ss.get('hv4');ss.set('hv4');showStats(first)})();
-function countPlay(){ // one "player session" = first game start in a browser session
+function countPlay(){
   if(ss.get('hp4'))return;ss.set('hp4');
   cnt('plays',true).then(()=>showStats(false));
 }
 
-/* ============ 2. ADOPTION FORM ============ */
+/* ============ 2. SECURE ADOPTION FORM (FORMSPREE) ============ */
 const af=$('adoptionForm');
 af.addEventListener('submit',async e=>{
   e.preventDefault();
@@ -265,10 +272,17 @@ af.addEventListener('submit',async e=>{
   if(af.querySelector('[name=_gotcha]').value||!af.reportValidity())return;
   sb.disabled=true;sb.textContent='Sending...';st.textContent='';
   try{
+    // Note: If you haven't replaced the Formspree ID, this will intentionally fail to remind you.
+    if(af.action.includes('YOUR_FORM_ID')) {
+        throw new Error('Formspree ID not configured yet.');
+    }
     const r=await fetch(af.action,{method:'POST',body:new FormData(af),headers:{Accept:'application/json'}});
     if(!r.ok)throw new Error(r.status);
-    af.reset();st.textContent='Thank you! Your letter has been sent successfully.';
-  }catch(err){st.textContent='Sorry, your letter could not be sent. Please try again later.'}
+    af.reset();st.textContent='Thank you! Your letter has been sent successfully and privately.';
+  }catch(err){
+    st.textContent='Sorry, your letter could not be sent. Please try again later.';
+    console.error('Form submission failed:', err);
+  }
   finally{sb.disabled=false;sb.textContent='Send Adoption Letter'}
 });
 
@@ -289,7 +303,7 @@ addEventListener('scroll',()=>$('hint').classList.toggle('hidden',scrollY>100));
 
 /* ============ 4. GAME ============ */
 const cv=$('cv'),ctx=cv.getContext('2d'),wrap=$('gw'),ov=$('ov'),winBar=$('winBar'),pauseBtn=$('pauseBtn'),ob=$('obBtn');
-const M=110,GOAL=300,MAXH=3;   // px per metre, goal metres, max hearts
+const M=110,GOAL=300,MAXH=3;
 let S=null,raf=0,paused=false,snd=true,best=0,AC=null,dieT=0;
 
 function beep(f,d=.08,t='square',v=.035){
@@ -373,7 +387,7 @@ function pop(t,x,y,c='#fff'){S.pop.push({t,x,y,l:70,c})}
 function jump(){
   const s=S;
   if(!s||s.dead||paused||s.cd>0)return;
-  if(s.win){ // tap during the victory flight = heart fireworks
+  if(s.win){
     for(let i=0;i<24;i++)s.par.push({x:s.cx,y:s.b-20,vx:(Math.random()-.5)*9,vy:(Math.random()-.8)*8,l:110,m:110,h:1,z:10+Math.random()*10,c:Math.random()>.5?'#ef4444':'#f472b6'});
     if(s.b>=cv.height-31)s.vy=-14;beep(900,.15,'sine');return;
   }
@@ -404,7 +418,6 @@ function step(){
   if(s.dead){s.shake*=.92;s.par=s.par.filter(p=>(p.x+=p.vx,p.y+=p.vy,--p.l>0));return}
   s.mu+=((s.sup?1.8:1)-s.mu)*.05;const mult=s.mu,spd=s.v*mult;
 
-  // distance is continuous and ALSO counts during Super-Cat
   if(!s.win){
     const dd=spd/M;s.d+=dd;if(s.sup)s.supD+=dd;
     s.v=5+3.5*(1-Math.exp(-s.d/130));
@@ -418,7 +431,6 @@ function step(){
       winBar.style.display='flex';meow(true);[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.25,'triangle',.02),700+i*140));}
   }
 
-  // cat movement
   if(s.win){winStep()
   }else if(s.sup){
     s.b+=(gy-120+Math.sin(s.f*.1)*18-s.b)*.15;s.vy=0;s.sup--;
@@ -443,19 +455,17 @@ function step(){
   if(s.shake>0)s.shake*=.9;if(s.flash>0)s.flash--;
 
   if(!s.win){
-    // spawning
     if(!s.sup&&!s.glide&&--s.sn<=0){spawnObs();s.sn=Math.max(38,95-s.v*4.5)*(.75+Math.random()*.7)}
     if(!s.sup&&s.f%75===0)spawnRew('yarn',gy-100-Math.random()*70);
     if(!s.sup&&s.f%120===60)spawnRew(Math.random()<.35?'wet':'treat',gy-70-Math.random()*90);
 
-    // cat hitbox
     const ins=9+(s.sz-1)*9,L=s.cx-h/2+ins,R=s.cx+h/2-ins,T=s.b-h+14+(s.sz-1)*8,B=s.b;
     for(let i=s.obs.length-1;i>=0;i--){
       const o=s.obs[i];o.x-=spd+(o.t==='pigeon'?2:0);
       if(o.x+o.w<-10){s.obs.splice(i,1);continue}
       if(s.sup)continue;
       if(L<o.x+o.w&&R>o.x&&T<o.y+o.h&&B>o.y){
-        if(s.sz>=1.5&&(o.t==='mouse'||o.t==='cucumber')){ // CHONK SMASH
+        if(s.sz>=1.5&&(o.t==='mouse'||o.t==='cucumber')){
           s.obs.splice(i,1);s.smash++;burst(o.x+o.w/2,o.y,16,o.t==='mouse'?'#f8fafc':'#22c55e',10);
           pop('💥 SMASH!',o.x,o.y-20,'#fbbf24');s.shake=6;beep(150,.15,'sawtooth');
         }else if(s.inv<=0){
@@ -491,8 +501,6 @@ function step(){
   s.pop=s.pop.filter(p=>{p.y-=.6;return --p.l>0});
 }
 
-
-/* ---------- victory party: random happy antics on the floor ---------- */
 const TRICKS={run:'🏃 Happy trot!',zoomies:'💨 ZOOMIES!',hops:'🐇 Bunny hops!',backflip:'🤸 Backflips!',roll:'🌀 Rolling around!',eat:'🥘 Nom nom nom...',moonwalk:'🕺 Moonwalk!',playdead:'💀 Dramatic death...',wiggle:'🐾 Wiggle... POUNCE!',spin:'🌪️ Spinning!',leap:'🦘 Mansaf leap!',mouse:'🐭 Chasing a toy mouse!',moon:'🌙 Off to kiss the moon!',hug:'🤗 A big hug for YOU!'};
 function nextMove(first){
   const s=S,W=cv.width;let k=first;s.toy=null;
@@ -505,7 +513,7 @@ function nextMove(first){
   if(k==='eat'){m.t=190;m.tx=W/2+(Math.random()<.5?-105:105)}
   if(k==='zoomies')m.t=150;
   if(k==='playdead')m.t=130;
-  if(['backflip','wiggle','leap','mouse','moon','hug'].includes(k))m.t=600; // these end when finished
+  if(['backflip','wiggle','leap','mouse','moon','hug'].includes(k))m.t=600;
   if(k==='leap'){m.side=Math.random()<.5?-1:1;m.tx=W/2+m.side*130}
   pop(TRICKS[k],Math.max(10,Math.min(W-190,s.cx-50)),cv.height-175,'#fde68a');
   if(Math.random()<.4)meow(true);
@@ -518,7 +526,7 @@ function winStep(){
   const dust=()=>s.par.push({x:s.cx-s.face*18,y:gy-2,vx:-s.face*1.5,vy:-Math.random()*1.5,l:18,m:18,c:'#cbd5e1'});
   const love=n=>{for(let i=0;i<n;i++)s.par.push({x:s.cx+(Math.random()-.5)*30,y:s.b-30,vx:(Math.random()-.5)*4,vy:-1.5-Math.random()*3,l:100,m:100,h:1,z:8+Math.random()*10,c:Math.random()>.5?'#ef4444':'#f472b6'})};
   s.fx=1;s.xe=false;s.fly=false;s.moonGlow=0;if(k!=='hug'){s.zm=1;s.zu=0;s.kiss=0}
-  const homeAct=()=>{ // new-home finale
+  const homeAct=()=>{
     const H=s.hm;H.t++;
     if(H.ph==='fade'){s.fade=Math.min(1,H.t/30);if(H.t>=30){s.scene='home';s.cx=-40;s.b=gy;s.vy=0;s.par=[];s.pop=[];s.toy=null;s.face=1;s.arm=0;s.cap='A loving home in Amman is waiting for her... 🏡';H.ph='enter';H.t=0}}
     else if(H.ph==='enter'){s.fade=Math.max(0,1-H.t/30);if(f%14===0)s.vy=-4;go(W*.33,3.4);if(H.t>110){H.ph='run';H.t=0;s.arm=1;s.cap='Welcome home, Hammicha! 💖'}}
@@ -600,7 +608,6 @@ function winStep(){
   }
   s.cx=Math.max(s.hm&&s.hm.ph==='enter'?-60:40,Math.min(W-40,s.cx));
   if(f%22===0)love(1);
-  // floor physics
   if(s.fly)s.vy=0;else{s.vy+=.7;s.b+=s.vy}
   if(s.b>=gy){if(s.vy>6){s.sq=1.3;s.st=.7;for(let i=0;i<5;i++)dust();love(3)}s.b=gy;s.vy=0}
 }
@@ -617,7 +624,6 @@ function die(){
   },1300);
 }
 
-/* ---------- rendering ---------- */
 function skyline(off,col,hm,wd,gy){
   ctx.fillStyle=col;const n=Math.ceil(cv.width/wd)+2,i0=Math.floor(off/wd);
   for(let i=i0;i<i0+n;i++){
@@ -696,7 +702,7 @@ function drawObs(o){
     ctx.fillStyle='#8b5cf6';ctx.beginPath();ctx.roundRect(o.x+5,o.y+10,20,15,5);ctx.arc(o.x+15,o.y+10,10,0,7);ctx.fill();
     ctx.beginPath();ctx.moveTo(o.x+5,o.y+5);ctx.lineTo(o.x+10,o.y-5);ctx.lineTo(o.x+15,o.y+5);ctx.moveTo(o.x+25,o.y+5);ctx.lineTo(o.x+20,o.y-5);ctx.lineTo(o.x+15,o.y+5);ctx.fill();
     ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.arc(o.x+10,o.y+8,2,0,7);ctx.arc(o.x+20,o.y+8,2,0,7);ctx.fill();
-  }else{ // pigeon
+  }else{
     const fl=Math.sin(S.f*.4)*8;
     ctx.fillStyle='#94a3b8';ctx.beginPath();ctx.ellipse(o.x+17,o.y+10,15,8,0,0,7);ctx.arc(o.x+4,o.y+7,5,0,7);ctx.fill();
     ctx.beginPath();ctx.moveTo(o.x+12,o.y+8);ctx.lineTo(o.x+24,o.y+8);ctx.lineTo(o.x+18,o.y-4+fl);ctx.fill();
@@ -734,7 +740,6 @@ function render(){
   ctx.fillStyle='#0f172a';ctx.fillRect(-20,gy,W+40,40);
   ctx.fillStyle='#38bdf8';ctx.shadowColor='#38bdf8';ctx.shadowBlur=10;ctx.fillRect(0,gy,W,2);ctx.shadowBlur=0;
   ctx.fillStyle='rgba(148,163,184,.35)';const off=(s.d*M)%40;for(let x=-off;x<W;x+=40)ctx.fillRect(x,gy+14,20,3);
-  // 10m sign posts + Mansaf finish
   ctx.font='bold 13px Nunito,sans-serif';ctx.textAlign='center';
   const wx=240-s.d*M;
   if(wx>-130){ctx.fillStyle='#94a3b8';ctx.fillRect(wx-100,gy-56,4,56);ctx.fillRect(wx+96,gy-56,4,56);ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.roundRect(wx-110,gy-84,220,28,6);ctx.fill();ctx.fillStyle='#0f172a';ctx.font='bold 14px Nunito,sans-serif';ctx.fillText('Welcome to Amman, Jordan',wx,gy-65);ctx.font='bold 13px Nunito,sans-serif'}
@@ -748,7 +753,7 @@ function render(){
   const mx=s.win?102+(W/2-102)*Math.min(1,(s.f-s.wf)/60):102+(GOAL-s.d)*M+60;
   if(mx<W+100)mansaf(mx,gy);
   }
-  if(s.sup){ // speed lines
+  if(s.sup){
     ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=2;
     for(let i=0;i<10;i++){const y=(i*67+s.f*13)%gy,x=(i*211+s.f*37)%W;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-60,y);ctx.stroke()}
   }
@@ -757,13 +762,12 @@ function render(){
   s.par.forEach(p=>{ctx.globalAlpha=Math.max(0,p.l/p.m);ctx.fillStyle=p.c;if(p.h)heart(p.x,p.y,p.z);else{ctx.beginPath();ctx.arc(p.x,p.y,3,0,7);ctx.fill()}});
   ctx.globalAlpha=1;
   if(s.inv<=0||s.f%6<3||s.sup)drawCat();
-  if(s.sup){ // magnet aura
+  if(s.sup){
     const mr=220+8*Math.sin(s.f*.3),my=s.b-22*s.sz;
     ctx.strokeStyle=`rgba(244,114,182,${.3+.2*Math.sin(s.f*.3)})`;ctx.lineWidth=3;ctx.setLineDash([8,10]);ctx.lineDashOffset=-s.f*2;
     ctx.beginPath();ctx.arc(s.cx,my,mr,0,7);ctx.stroke();ctx.setLineDash([]);
     ctx.font='24px serif';ctx.fillText('🧲',s.cx-12,my-mr+8);ctx.font='900 16px Nunito,sans-serif';
   }
-  // floating texts
   ctx.font='900 16px Nunito,sans-serif';
   s.pop.forEach(p=>{ctx.globalAlpha=Math.min(1,p.l/25);ctx.fillStyle='#000';ctx.fillText(p.t,p.x+1,p.y+1);ctx.fillStyle=p.c;ctx.fillText(p.t,p.x,p.y)});
   ctx.globalAlpha=1;
@@ -772,13 +776,12 @@ function render(){
     ctx.font='900 '+Math.min(22,W/18|0)+'px Nunito,sans-serif';ctx.fillStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=6;ctx.fillText('Mwah! This one is for YOU 💕',W/2,H-42,W-20);ctx.restore()}
   if(s.cap){ctx.save();ctx.textAlign='center';ctx.font='900 '+Math.min(18,W/24|0)+'px Nunito,sans-serif';ctx.fillStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText(s.cap,W/2,H*.3,W-24);ctx.restore()}
   if(s.fade>0){ctx.fillStyle=`rgba(0,0,0,${s.fade})`;ctx.fillRect(0,0,W,H)}
-  if(s.cd>0){ // 3-2-1-GO countdown
+  if(s.cd>0){
     const n=s.cd>140?3:s.cd>80?2:s.cd>20?1:'GO!',k=s.cd>20?((s.cd-20)%60)/60:.4;
     ctx.save();ctx.textAlign='center';ctx.fillStyle='rgba(15,23,42,.35)';ctx.fillRect(0,0,W,H);
     ctx.font=`900 ${Math.round(H*.4*(.75+k*.45))}px Nunito,sans-serif`;ctx.fillStyle=n==='GO!'?'#4ade80':'#fff';ctx.shadowColor='#f472b6';ctx.shadowBlur=25;
     ctx.fillText(n,W/2,H*.62);ctx.shadowBlur=0;ctx.font='900 18px Nunito,sans-serif';ctx.fillStyle='#fde68a';ctx.fillText('Get ready!',W/2,H*.2);ctx.restore();
   }
-  // HUD
   ctx.fillStyle='rgba(15,23,42,.6)';ctx.beginPath();ctx.roundRect(14,12,W-28,40,10);ctx.fill();
   const bw=Math.max(20,W-230),pr=Math.min(s.d/GOAL,1);
   ctx.fillStyle='#fff';ctx.font='bold 15px Nunito,sans-serif';ctx.fillText(s.d.toFixed(1)+'m',24,38);
@@ -789,12 +792,11 @@ function render(){
   ctx.fillText(`❤️ ${s.hearts}/${MAXH}`,18,76);ctx.fillText(`🐱×${s.sz.toFixed(1)}${s.sz>=1.5?' 💪':''}`,92,76);
   if(s.sup){ctx.fillStyle='#fbbf24';ctx.fillText(`⚡ SUPER +${s.supD.toFixed(1)}m`,18,98)}
   ctx.restore();
-  if(s.dead){ // tears
+  if(s.dead){
     ctx.fillStyle='#38bdf8';const ty=s.b-30+(Date.now()/60)%30;ctx.beginPath();ctx.arc(s.cx-8,ty,3,0,7);ctx.arc(s.cx+8,ty,3,0,7);ctx.fill();
   }
 }
 
-/* ---------- new-home finale scenery ---------- */
 function startHome(){const s=S;s.hm={ph:'fade',t:0};s.rot=0;s.fx=1;s.zm=1;s.zu=0;s.sq=s.st=1;s.cap=''}
 function person(x,gy,man,arm,f){
   const y=gy+Math.sin(f*.12+(man?0:1.7))*(arm===2?3:1.5),d=man?1:-1,w=Math.sin(f*.3);
@@ -820,7 +822,7 @@ function drawHome(s,W,H,gy){
   ctx.fillStyle='#a8703f';ctx.fillRect(-20,wy,W+40,H-wy+20);ctx.strokeStyle='rgba(60,30,10,.25)';ctx.lineWidth=2;
   for(let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,wy);ctx.lineTo(x-30,H);ctx.stroke()}
   ctx.fillStyle='#7c4a24';ctx.fillRect(-20,wy-6,W+40,8);
-  const wx=W*.12,wyy=wy-175,ww=100,wh=95; // window with Amman at night
+  const wx=W*.12,wyy=wy-175,ww=100,wh=95;
   ctx.fillStyle='#1e1b4b';ctx.fillRect(wx,wyy,ww,wh);ctx.fillStyle='#fef08a';ctx.beginPath();ctx.arc(wx+72,wyy+25,11,0,7);ctx.fill();
   ctx.fillStyle='#312e81';ctx.fillRect(wx,wyy+68,28,27);ctx.fillRect(wx+34,wyy+55,22,40);ctx.beginPath();ctx.arc(wx+45,wyy+55,11,Math.PI,0);ctx.fill();
   ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.strokeRect(wx,wyy,ww,wh);ctx.beginPath();ctx.moveTo(wx+ww/2,wyy);ctx.lineTo(wx+ww/2,wyy+wh);ctx.moveTo(wx,wyy+wh/2);ctx.lineTo(wx+ww,wyy+wh/2);ctx.stroke();
@@ -833,7 +835,6 @@ function drawHome(s,W,H,gy){
   ctx.textAlign='left';
 }
 
-/* ---------- input ---------- */
 const inView=()=>{const r=wrap.getBoundingClientRect();return r.bottom>80&&r.top<innerHeight-80};
 document.addEventListener('keydown',e=>{
   if(lbOpen()||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||''))return;
@@ -848,7 +849,6 @@ document.addEventListener('keydown',e=>{
 cv.addEventListener('pointerdown',e=>{e.preventDefault();if(S&&!S.dead)jump();else if(!S&&ov.style.display==='none')startGame()});
 $('jumpBtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();jump()});
 
-/* pause when tab hidden / page scrolled away; victory flight ends when the player scrolls elsewhere */
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S&&!S.win&&!S.dead&&!paused)togglePause()});
 new IntersectionObserver(([e])=>{
   if(!S||e.intersectionRatio>=.2)return;
